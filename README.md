@@ -107,6 +107,10 @@ Langkah-langkah ini memastikan aplikasi terintegrasi dengan API secara lancar da
 
 ---
 
+## Berita Acara
+Laporan lengkap mengenai progress pengerjaan kelompok:  
+[**Berita Acara PBP A.05**](https://docs.google.com/spreadsheets/d/1FHoXxDSGmiw7mO7gQiTH2vkq0Wm6oxjo/edit?gid=1741683645#gid=1741683645)  
+
 ## Deployment  
 
 Tautan aplikasi akan diperbarui setelah rilis:  
