@@ -115,3 +115,21 @@ Laporan lengkap mengenai progress pengerjaan kelompok:
 
 Tautan aplikasi akan diperbarui setelah rilis:  
 [**Tautan Deployment Aplikasi Batikin**]
+
+## Project Struc
+lib/
+├── constant/
+│   ├── colors.dart           # Contains color constants used across the app
+│   ├── fonts.dart            # Contains font style constants
+├── screens/
+│   └── login/
+│       ├── models/
+│       │   ├── user_model.dart     # Defines the user model
+│       │   ├── auth_model.dart     # Defines authentication-related models
+│       ├── services/
+│       │   ├── auth_service.dart   # Handles authentication logic
+│       │   ├── api_service.dart    # Manages API calls
+│       ├── widgets/
+│       │   ├── login_form.dart     # Widget for the login form
+│       │   ├── login_button.dart   # Widget for the login button
+│       └── login_screen.dart       # Main screen for login functionality
