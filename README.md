@@ -116,7 +116,7 @@ Laporan lengkap mengenai progress pengerjaan kelompok:
 Tautan aplikasi akan diperbarui setelah rilis:  
 [**Tautan Deployment Aplikasi Batikin**]
 
-## Project Struc
+## Project Structure
 ```plaintext
 lib/
 ├── constant/
