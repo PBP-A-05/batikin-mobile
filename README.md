@@ -117,12 +117,13 @@ Tautan aplikasi akan diperbarui setelah rilis:
 [**Tautan Deployment Aplikasi Batikin**]
 
 ## Project Struc
+```plaintext
 lib/
 ├── constant/
 │   ├── colors.dart           # Contains color constants used across the app
 │   ├── fonts.dart            # Contains font style constants
 ├── screens/
-│   └── login/
+│   └── login/ (ganti jadi nama modul kalian)
 │       ├── models/
 │       │   ├── user_model.dart     # Defines the user model
 │       │   ├── auth_model.dart     # Defines authentication-related models
@@ -133,3 +134,4 @@ lib/
 │       │   ├── login_form.dart     # Widget for the login form
 │       │   ├── login_button.dart   # Widget for the login button
 │       └── login_screen.dart       # Main screen for login functionality
+```
