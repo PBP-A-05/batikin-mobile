@@ -107,7 +107,31 @@ Langkah-langkah ini memastikan aplikasi terintegrasi dengan API secara lancar da
 
 ---
 
+## Berita Acara
+Laporan lengkap mengenai progress pengerjaan kelompok:  
+[**Berita Acara PBP A.05**](https://docs.google.com/spreadsheets/d/1FHoXxDSGmiw7mO7gQiTH2vkq0Wm6oxjo/edit?gid=1741683645#gid=1741683645)  
+
 ## Deployment  
 
 Tautan aplikasi akan diperbarui setelah rilis:  
 [**Tautan Deployment Aplikasi Batikin**]
+
+## Project Structure
+```plaintext
+lib/
+├── constant/
+│   ├── colors.dart           # Contains color constants used across the app
+│   ├── fonts.dart            # Contains font style constants
+├── screens/
+│   └── login/ (ganti jadi nama modul kalian)
+│       ├── models/
+│       │   ├── user_model.dart     # Defines the user model
+│       │   ├── auth_model.dart     # Defines authentication-related models
+│       ├── services/
+│       │   ├── auth_service.dart   # Handles authentication logic
+│       │   ├── api_service.dart    # Manages API calls
+│       ├── widgets/
+│       │   ├── login_form.dart     # Widget for the login form
+│       │   ├── login_button.dart   # Widget for the login button
+│       └── login_screen.dart       # Main screen for login functionality
+```
