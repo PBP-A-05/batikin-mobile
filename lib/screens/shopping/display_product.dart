@@ -1,0 +1,452 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:batikin_mobile/models/product.dart';
+import 'package:batikin_mobile/constant/colors.dart';
+import 'package:batikin_mobile/constant/fonts.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';  
+
+class DisplayProduct extends StatefulWidget {
+  final String initialCategory;
+
+  const DisplayProduct({super.key, required this.initialCategory});
+
+  @override
+  State<DisplayProduct> createState() => _DisplayProductState();
+}
+
+class _DisplayProductState extends State<DisplayProduct> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  int _currentIndex = 0;
+  List<Product> products = [];
+  bool isLoading = true;
+  late String selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCategory = widget.initialCategory;
+    fetchProducts();
+    
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> fetchProducts() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/shopping/json/'),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          products = productFromJson(response.body);
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  List<Product> getFilteredProducts() {
+    return products.where((product) => 
+      product.fields.category == selectedCategory
+    ).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // Main Scrollable Content
+          CustomScrollView(
+            slivers: [
+              // Spacing for AppBar
+              const SliverToBoxAdapter(
+                child: SizedBox(height: kToolbarHeight + 20),
+              ),
+              
+              // Main Content
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header Section
+                      Row(
+                        children: [
+                          Text(
+                            'Koleksi Batikin',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.coklat2,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: const Color(0xFFDCD2C2),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Temukan keindahan batik Yogyakarta yang kaya makna di sini.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: AppColors.coklat3,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Filter Buttons
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterButton('pakaian_pria', 'Pakaian Pria'),
+                            const SizedBox(width: 8),
+                            _buildFilterButton('pakaian_wanita', 'Pakaian Wanita'),
+                            const SizedBox(width: 8),
+                            _buildFilterButton('aksesoris', 'Aksesoris'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Products Grid with Animation
+              SliverPadding(
+                padding: const EdgeInsets.all(16.0),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final products = getFilteredProducts();
+                      if (index >= products.length) return null;
+                      return FadeTransition(
+                        opacity: _animation,
+                        child: _buildProductCard(products[index]),
+                      );
+                    },
+                    childCount: isLoading ? 4 : getFilteredProducts().length,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Fixed AppBar with shadow
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.coklat1.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Container(
+                  height: kToolbarHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: AppColors.coklat1),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'Batikin',
+                            style: TextStyle(
+                              fontFamily: AppFonts.javaneseText,
+                              fontSize: 24,
+                              color: AppColors.coklat1,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      
+      // Floating Navigation Bar
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                canvasColor: Colors.transparent,
+              ),
+              child: BottomNavigationBar(
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
+                elevation: 0,
+                selectedItemColor: AppColors.coklat3,
+                unselectedItemColor: AppColors.coklat1Rgba,
+                selectedLabelStyle: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                unselectedLabelStyle: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.favorite_border),
+                    label: 'Wishlist',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.shopping_cart),
+                    label: 'Cart',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.person),
+                    label: 'Profile',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String category, String label) {
+    final isSelected = selectedCategory == category;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            selectedCategory = category;
+            _controller.reset();
+            _controller.forward();
+          });
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: isSelected ? AppColors.bgGradientCoklat : null,
+            border: Border.all(
+              color: isSelected ? Colors.transparent : AppColors.coklat1,
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(
+              color: isSelected ? Colors.white : AppColors.coklat3,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Product product) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product Image
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+              child: Image.network(
+                product.fields.imageUrls[0],
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
+            ),
+          ),
+
+          // Product Info
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Category Label
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFDCD2C2), width: 1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _getCategoryDisplayName(product.fields.category),
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: AppColors.coklat3,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Product Name
+                Text(
+                  product.fields.productName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.coklat1,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+
+                // Price and Wishlist
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      product.fields.price,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.coklat2,
+                      ),
+                    ),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          // Implement wishlist functionality
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.favorite_border,
+                            size: 20,
+                            color: Color(0xFFDCD2C2),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getCategoryDisplayName(String category) {
+    switch (category) {
+      case 'pakaian_pria':
+        return 'Pakaian Pria';
+      case 'pakaian_wanita':
+        return 'Pakaian Wanita';
+      case 'aksesoris':
+        return 'Aksesoris';
+      default:
+        return category;
+    }
+  }
+}
