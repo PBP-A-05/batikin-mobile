@@ -1,7 +1,7 @@
 // lib/screens/placeholder/placeholder.dart
 
 import 'package:flutter/material.dart';
-import 'package:batikin_mobile/constant/colors.dart'; // Ensure this path is correct
+import 'package:batikin_mobile/constants/colors.dart'; // Ensure this path is correct
 
 class PlaceholderPage extends StatelessWidget {
   final String title;

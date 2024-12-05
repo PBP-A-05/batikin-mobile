@@ -1,6 +1,7 @@
 // lib/services/auth_service.dart
 
 import 'dart:convert';
+import 'package:batikin_mobile/models/profile_model.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:batikin_mobile/config/config.dart';
 
@@ -18,10 +19,14 @@ class AuthService {
     return response;
   }
 
-  Future<Map<String, dynamic>> logout() async {
+  Future logout() async {
     final String url = "${Config.baseUrl}/auth/logout/";
     final response = await request.logout(url);
-    return response;
+    if (response.status == true) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   Future<Map<String, dynamic>> register({
@@ -41,6 +46,40 @@ class AuthService {
           "password1": password1,
           "password2": password2,
         }));
+    return response;
+  }
+
+  Future<Profile?> getUserInfo() async {
+    final response =
+        await request.get("${Config.baseUrl}/account/get_user_info");
+    if (response != null && response.isNotEmpty) {
+      try {
+        return Profile.fromJson(response);
+      } catch (e) {
+        // Handle JSON parsing error
+        print("Error parsing profile data: $e");
+        return null;
+      }
+    } else {
+      // Handle empty response or unauthorized access
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> updateProfile({
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+  }) async {
+    final String url = "${Config.baseUrl}/account/update_profile/";
+    final response = await request.post(
+      url,
+      {
+        'first_name': firstName,
+        'last_name': lastName,
+        'phone_number': phoneNumber,
+      },
+    );
     return response;
   }
 }

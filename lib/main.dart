@@ -1,9 +1,11 @@
 // lib/main.dart
+import 'package:batikin_mobile/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:batikin_mobile/screens/authentication/login.dart';
+import 'package:batikin_mobile/screens/authentication/login_screen.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:batikin_mobile/screens/placeholder/placeholder.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,7 +41,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const LoginPage(),
+        home: const MyHomePage(),
         debugShowCheckedModeBanner: false,
       ),
     );

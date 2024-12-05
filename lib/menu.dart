@@ -2,8 +2,8 @@
 
 import 'package:batikin_mobile/screens/placeholder/placeholder.dart';
 import 'package:flutter/material.dart';
-import 'package:batikin_mobile/screens/profile/profile.dart';
-import 'package:batikin_mobile/constant/colors.dart'; // Ensure this path is correct
+import 'package:batikin_mobile/screens/profile/profile_screen.dart';
+import 'package:batikin_mobile/constants/colors.dart'; // Ensure this path is correct
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
