@@ -100,7 +100,7 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
                           Text(
                             'Koleksi Batikin',
                             style: GoogleFonts.poppins(
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.coklat2,
                             ),
@@ -118,7 +118,7 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
                       Text(
                         'Temukan keindahan batik Yogyakarta yang kaya makna di sini.',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: AppColors.coklat3,
                         ),
                       ),
@@ -127,14 +127,19 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
                       // Filter Buttons
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildFilterButton('pakaian_pria', 'Pakaian Pria'),
-                            const SizedBox(width: 8),
-                            _buildFilterButton('pakaian_wanita', 'Pakaian Wanita'),
-                            const SizedBox(width: 8),
-                            _buildFilterButton('aksesoris', 'Aksesoris'),
-                          ],
+                        child: Container(
+                          width: MediaQuery.of(context).size.width, // Match parent width
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
+                            children: [
+                              _buildFilterButton('pakaian_pria', 'Pakaian Pria'),
+                              const SizedBox(width: 40),
+                              _buildFilterButton('pakaian_wanita', 'Pakaian Wanita'),
+                              const SizedBox(width: 40),
+                              _buildFilterButton('aksesoris', 'Aksesoris'),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -290,44 +295,37 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
 
   Widget _buildFilterButton(String category, String label) {
     final isSelected = selectedCategory == category;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            selectedCategory = category;
-            _controller.reset();
-            _controller.forward();
-          });
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: isSelected ? AppColors.bgGradientCoklat : null,
-            border: Border.all(
-              color: isSelected ? Colors.transparent : AppColors.coklat1,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCategory = category;
+        });
+        // Reset animation dan jalankan kembali
+        _controller.reset();
+        _controller.forward();
+      },
+      child: Column(
+        children: [
+          Text(
             label,
             style: GoogleFonts.poppins(
-              color: isSelected ? Colors.white : AppColors.coklat3,
-              fontWeight: FontWeight.w500,
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: AppColors.coklat2,
             ),
           ),
-        ),
+          const SizedBox(height: 4),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            height: 3,
+            width: 80,
+            decoration: BoxDecoration(
+              gradient: isSelected ? AppColors.bgGradientCoklat : null,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
       ),
     );
   }

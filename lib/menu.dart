@@ -19,19 +19,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final PageController _pageController = PageController(viewportFraction: 0.8);
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Selamat datang, ${widget.username}!'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
