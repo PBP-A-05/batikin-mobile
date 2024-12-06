@@ -5,6 +5,7 @@ import 'package:batikin_mobile/constant/colors.dart';
 import 'package:batikin_mobile/constant/fonts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';  
+import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
 
 class DisplayProduct extends StatefulWidget {
   final String initialCategory;
@@ -332,107 +333,124 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
   }
 
   Widget _buildProductCard(Product product) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-              child: Image.network(
-                product.fields.imageUrls[0],
-                fit: BoxFit.cover,
-                width: double.infinity,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // Add hero animation and navigation
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DisplayProductDetail(
+                productId: product.pk,
               ),
             ),
+          );
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-
-          // Product Info
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Category Label
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFDCD2C2), width: 1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _getCategoryDisplayName(product.fields.category),
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      color: AppColors.coklat3,
-                    ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Image
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                  child: Image.network(
+                    product.fields.imageUrls[0],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
                   ),
                 ),
-                const SizedBox(height: 4),
+              ),
 
-                // Product Name
-                Text(
-                  product.fields.productName,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.coklat1,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              // Product Info
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
                 ),
-                const SizedBox(height: 4),
-
-                // Price and Wishlist
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.fields.price,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.coklat2,
-                      ),
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          // Implement wishlist functionality
-                        },
+                    // Category Label
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFDCD2C2), width: 1),
                         borderRadius: BorderRadius.circular(20),
-                        child: const Padding(
-                          padding: EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.favorite_border,
-                            size: 20,
-                            color: Color(0xFFDCD2C2),
-                          ),
+                      ),
+                      child: Text(
+                        _getCategoryDisplayName(product.fields.category),
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: AppColors.coklat3,
                         ),
                       ),
                     ),
+                    const SizedBox(height: 4),
+
+                    // Product Name
+                    Text(
+                      product.fields.productName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.coklat1,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Price and Wishlist
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          product.fields.price,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.coklat2,
+                          ),
+                        ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              // Implement wishlist functionality
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: const Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.favorite_border,
+                                size: 20,
+                                color: Color(0xFFDCD2C2),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
