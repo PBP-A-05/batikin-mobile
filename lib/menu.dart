@@ -3,6 +3,7 @@ import 'package:batikin_mobile/constant/colors.dart';
 import 'package:batikin_mobile/constant/fonts.dart';
 import 'package:batikin_mobile/constant/image_strings.dart';
 import 'package:batikin_mobile/screens/shopping/display_product.dart';
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
 import 'package:google_fonts/google_fonts.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -260,9 +261,13 @@ class _MyHomePageState extends State<MyHomePage> {
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+              if (index == 2) { // Cart index
+                Navigator.pushNamed(context, '/cart');
+              } else {
+                setState(() {
+                  _currentIndex = index;
+                });
+              }
             },
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.transparent,

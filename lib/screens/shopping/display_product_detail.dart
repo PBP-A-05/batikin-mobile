@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:batikin_mobile/models/product_detail.dart';
 import 'package:batikin_mobile/constant/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -262,7 +263,12 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
               ),
               IconButton(
                 icon: Icon(Icons.shopping_cart, color: AppColors.coklat1),
-                onPressed: () {/* Implement cart */},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DisplayCart()),
+                  );
+                },
               ),
               IconButton(
                 icon: Icon(Icons.person, color: AppColors.coklat1),

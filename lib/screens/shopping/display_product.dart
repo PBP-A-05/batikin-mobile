@@ -6,6 +6,7 @@ import 'package:batikin_mobile/constant/fonts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';  
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
 
 class DisplayProduct extends StatefulWidget {
   final String initialCategory;
@@ -217,7 +218,15 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
                           ),
                         ),
                       ),
-                      const SizedBox(width: 48),
+                      IconButton(
+                        icon: Icon(Icons.shopping_cart, color: AppColors.coklat1),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const DisplayCart()),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -250,9 +259,16 @@ class _DisplayProductState extends State<DisplayProduct> with SingleTickerProvid
               child: BottomNavigationBar(
                 currentIndex: _currentIndex,
                 onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
+                  if (index == 2) { // Cart index
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DisplayCart()),
+                    );
+                  } else {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  }
                 },
                 type: BottomNavigationBarType.fixed,
                 backgroundColor: Colors.white,
