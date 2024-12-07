@@ -4,6 +4,7 @@ import 'package:batikin_mobile/models/product_detail.dart';
 import 'package:batikin_mobile/constant/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:batikin_mobile/screens/comments_review/comment_page.dart';  // Add this import
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -215,6 +216,49 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                   ),
                 ),
               ),
+
+              // Add Review Button Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommentPage(
+                            productId: widget.productId,
+                            productName: product?.fields.name ?? 'Product',
+                            shopId: product?.fields.shopId ?? 0, // Use actual shop ID or default to 0
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.coklat1,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.rate_review),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Tambahkan Ulasan',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
 
@@ -226,7 +270,49 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             bottom: 16,
             left: 16,
             right: 16,
-            child: _buildFloatingActionButton(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildFloatingActionButton(), // Existing wishlist button
+                const SizedBox(height: 8), // Spacing between buttons
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommentPage(
+                          productId: widget.productId,
+                          productName: product?.fields.name ?? 'Product',
+                          shopId: int.parse(product?.fields.shopId ?? '0'), // Convert string to int
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.coklat1,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(50), // Makes button full width
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.rate_review),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Tambahkan Ulasan',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
