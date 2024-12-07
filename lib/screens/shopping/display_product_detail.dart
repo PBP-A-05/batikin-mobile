@@ -4,6 +4,9 @@ import 'package:batikin_mobile/models/product_detail.dart';
 import 'package:batikin_mobile/constant/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:batikin_mobile/services/cart_service.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -465,12 +468,9 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   }
 
   Widget _buildFloatingActionButton() {
-    // Parse price string to get numeric value
     final priceString = product!.fields.price.replaceAll(RegExp(r'[^0-9]'), '');
     final price = double.tryParse(priceString) ?? 0;
     final totalPrice = price * quantity;
-    
-    // Format price 
     final formattedPrice = 'Rp${_formatNumber(totalPrice)}';
     
     return Container(
@@ -498,8 +498,36 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             ),
           ),
           TextButton(
-            onPressed: () {
-              // Implement add to cart
+            onPressed: () async {
+              final request = Provider.of<CookieRequest>(context, listen: false);
+              final cartService = CartService(request);
+              
+              try {
+                final response = await cartService.addToCart(
+                  product!.pk,
+                  quantity,
+                );
+                
+                if (response.status == "success") {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("$quantity produk berhasil dimasukkan ke keranjang!"),
+                      backgroundColor: AppColors.coklat2,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Gagal menambahkan ke keranjang"),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
             },
             child: Text(
               'Tambahkan ke Keranjang',
