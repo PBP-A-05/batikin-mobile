@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/authentication/login.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
 
 void main() {
   runApp(const MyApp());
@@ -41,6 +42,9 @@ class MyApp extends StatelessWidget {
         ),
         home: const LoginPage(),
         debugShowCheckedModeBanner: false,
+        routes: {
+          '/cart': (context) => const DisplayCart(), // Add the cart route
+        },
       ),
     );
   }
