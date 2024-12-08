@@ -25,4 +25,11 @@ class CartService {
     );
     return ViewCart.fromJson(response);
   }
+
+  Future<ViewCart> sortCart(String sortBy) async {
+    final response = await request.get(
+      '${Config.baseUrl}/cart/api/sort/?sort_by=$sortBy',
+    );
+    return ViewCart.fromJson(response);
+  }
 }
