@@ -17,6 +17,30 @@ class _DisplayCartState extends State<DisplayCart> {
   Map<int, bool> selectedItems = {};
   double totalPrice = 0;
   final String baseUrl = 'http://127.0.0.1:8000';
+  ViewCart? cartData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadCartData();
+  }
+
+  Future<void> loadCartData() async {
+    final request = context.read<CookieRequest>();
+    try {
+      final cart = await CartService(request).viewCart();
+      setState(() {
+        cartData = cart;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error loading cart: $e")),
+      );
+    }
+  }
 
   void updateTotalPrice(List<CartItem> items) {
     double total = 0;
@@ -32,14 +56,13 @@ class _DisplayCartState extends State<DisplayCart> {
     });
   }
 
-  Future<void> handleQuantityChange(CartItem item, bool increment, ViewCart cart) async {
+  Future<void> handleQuantityChange(CartItem item, bool increment) async {
     final request = context.read<CookieRequest>();
     int newQuantity = increment ? item.quantity + 1 : item.quantity - 1;
     
     if (newQuantity < 1) return;
 
     try {
-      // Menggunakan pbp_django_auth untuk update quantity
       final response = await request.post(
         '$baseUrl/cart/api/update/${item.id}/',
         {
@@ -47,13 +70,12 @@ class _DisplayCartState extends State<DisplayCart> {
         },
       );
 
-      // Update UI jika berhasil
       if (response['status'] == 'success') {
         setState(() {
-          final index = cart.data.cartItems.indexWhere((i) => i.id == item.id);
+          final index = cartData!.data.cartItems.indexWhere((i) => i.id == item.id);
           if (index != -1) {
-            cart.data.cartItems[index].quantity = newQuantity;
-            updateTotalPrice(cart.data.cartItems);
+            cartData!.data.cartItems[index].quantity = newQuantity;
+            updateTotalPrice(cartData!.data.cartItems);
           }
         });
       } else {
@@ -70,11 +92,10 @@ class _DisplayCartState extends State<DisplayCart> {
     }
   }
 
-  Future<void> handleRemoveItem(int itemId, ViewCart cart) async {
+  Future<void> handleRemoveItem(int itemId) async {
     final request = context.read<CookieRequest>();
 
     try {
-      // Menggunakan pbp_django_auth untuk remove item
       final response = await request.post(
         '$baseUrl/cart/api/remove/$itemId/',
         {},
@@ -82,9 +103,9 @@ class _DisplayCartState extends State<DisplayCart> {
 
       if (response['status'] == 'success') {
         setState(() {
-          cart.data.cartItems.removeWhere((item) => item.id == itemId);
+          cartData!.data.cartItems.removeWhere((item) => item.id == itemId);
           selectedItems.remove(itemId);
-          updateTotalPrice(cart.data.cartItems);
+          updateTotalPrice(cartData!.data.cartItems);
         });
       } else {
         if (!context.mounted) return;
@@ -102,8 +123,6 @@ class _DisplayCartState extends State<DisplayCart> {
 
   @override
   Widget build(BuildContext context) {
-    final request = context.watch<CookieRequest>();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
@@ -125,197 +144,182 @@ class _DisplayCartState extends State<DisplayCart> {
           ),
         ],
       ),
-      body: FutureBuilder<ViewCart>(
-        future: CartService(request).viewCart(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.data.cartItems.isEmpty) {
-            return const Center(child: Text('Keranjang kosong'));
-          }
-
-          final cart = snapshot.data!;
-          
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Keranjang',
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.coklat2,
+      body: isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : cartData == null || cartData!.data.cartItems.isEmpty
+          ? const Center(child: Text('Belum ada item di keranjang!'))
+          : Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Keranjang',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.coklat2,
+                        ),
                       ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.coklat1),
-                        borderRadius: BorderRadius.circular(8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.coklat1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: Text(
+                            'Urutkan berdasarkan',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.coklat2,
+                              fontSize: 12,
+                            ),
+                          ),
+                          label: Icon(Icons.arrow_drop_down, color: AppColors.coklat2),
+                        ),
                       ),
-                      child: TextButton.icon(
-                        onPressed: () {},
-                        icon: Text(
-                          'Urutkan berdasarkan',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.coklat2,
-                            fontSize: 12,
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: cartData!.data.cartItems.length,
+                    itemBuilder: (context, index) {
+                      final item = cartData!.data.cartItems[index];
+                      selectedItems.putIfAbsent(item.id, () => false);
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        elevation: 2,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(
+                            color: AppColors.coklat1.withOpacity(0.25),
+                            width: 1,
                           ),
                         ),
-                        label: Icon(Icons.arrow_drop_down, color: AppColors.coklat2),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: cart.data.cartItems.length,
-                  itemBuilder: (context, index) {
-                    final item = cart.data.cartItems[index];
-                    selectedItems.putIfAbsent(item.id, () => false);
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      elevation: 2,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: AppColors.coklat1.withOpacity(0.25),
-                          width: 1,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Checkbox(
-                              value: selectedItems[item.id] ?? false,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  selectedItems[item.id] = value ?? false;
-                                  updateTotalPrice(cart.data.cartItems);
-                                });
-                              },
-                              activeColor: AppColors.coklat2,
-                            ),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                item.imageUrls[0],
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                value: selectedItems[item.id] ?? false,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    selectedItems[item.id] = value ?? false;
+                                    updateTotalPrice(cartData!.data.cartItems);
+                                  });
+                                },
+                                activeColor: AppColors.coklat2,
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.productName,
-                                    style: GoogleFonts.poppins(
-                                      color: AppColors.coklat3,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: AppColors.coklat1),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      _getCategoryDisplayName(item.category),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  item.imageUrls[0],
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.productName,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        color: AppColors.coklat2,
+                                        color: AppColors.coklat3,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Rp${_formatNumber(item.price)}',
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: AppColors.coklat1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        _getCategoryDisplayName(item.category),
                                         style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10,
                                           color: AppColors.coklat2,
-                                          fontSize: 16,
                                         ),
                                       ),
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.delete_outline),
-                                            onPressed: () => handleRemoveItem(item.id, cart),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Rp${_formatNumber(item.price)}',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
                                             color: AppColors.coklat2,
+                                            fontSize: 16,
                                           ),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(color: AppColors.coklat1.withOpacity(0.25)),
-                                              borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.delete_outline),
+                                              onPressed: () => handleRemoveItem(item.id),
+                                              color: AppColors.coklat2,
                                             ),
-                                            child: Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(Icons.remove),
-                                                  onPressed: item.quantity > 1 
-                                                    ? () => handleQuantityChange(item, false, cart)
-                                                    : null,
-                                                  color: AppColors.coklat2,
-                                                ),
-                                                Text(
-                                                  '${item.quantity}',
-                                                  style: GoogleFonts.poppins(
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(color: AppColors.coklat1.withOpacity(0.25)),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(Icons.remove),
+                                                    onPressed: item.quantity > 1 
+                                                      ? () => handleQuantityChange(item, false)
+                                                      : null,
                                                     color: AppColors.coklat2,
                                                   ),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.add),
-                                                  onPressed: () => handleQuantityChange(item, true, cart),
-                                                  color: AppColors.coklat2,
-                                                ),
-                                              ],
+                                                  Text(
+                                                    '${item.quantity}',
+                                                    style: GoogleFonts.poppins(
+                                                      color: AppColors.coklat2,
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.add),
+                                                    onPressed: () => handleQuantityChange(item, true),
+                                                    color: AppColors.coklat2,
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-      ),
+              ],
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
         margin: const EdgeInsets.only(
