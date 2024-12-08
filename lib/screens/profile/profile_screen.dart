@@ -1,5 +1,6 @@
 // lib/screens/profile.dart
 import 'package:batikin_mobile/screens/profile/edit_profile_screen.dart';
+import 'package:batikin_mobile/screens/profile/history_booking_page.dart';
 import 'package:batikin_mobile/screens/profile/pemesanan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/constants/colors.dart';
@@ -192,7 +193,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           leading: const Icon(Icons.book_online),
                           title: const Text('History Booking'),
                           onTap: () {
-                            // Navigate to History Booking
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const HistoryBookingPage(),
+                              ),
+                            );
                           },
                         ),
                         ListTile(

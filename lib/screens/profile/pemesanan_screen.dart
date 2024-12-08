@@ -6,6 +6,7 @@ import 'package:batikin_mobile/models/order_model.dart';
 import 'package:batikin_mobile/services/order_service.dart';
 import 'package:batikin_mobile/utils/toast_util.dart';
 import 'package:batikin_mobile/constants/colors.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:batikin_mobile/widgets/custom_button.dart';
@@ -114,7 +115,7 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                       // Item Image
                       Container(
                         width: double.infinity,
-                        height: 150,
+                        height: 300,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
                           image: DecorationImage(
@@ -160,7 +161,13 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                         children: [
                           TextButton(
                             onPressed: () {
-                              showOrderDetails(context, order);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      OrderDetailPage(order: order),
+                                ),
+                              );
                             },
                             child: Text(
                               'Lihat Detail Pemesanan',
@@ -171,22 +178,30 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          CustomButton(
-                            text: 'Ulas',
+                          OutlinedButton(
                             onPressed: () {
-                              Navigator.push(
+                              showToast(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      OrderDetailPage(order: order),
-                                ),
+                                'Fitur belum tersedia',
+                                type: ToastType.success,
+                                gravity: ToastGravity.BOTTOM_RIGHT,
                               );
                             },
-                            width: 80,
-                            height: 35,
-                            backgroundColor: AppColors.coklat1,
-                            textColor: Colors.white,
-                            fontSize: 12,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: AppColors.coklat2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              backgroundColor: Colors.white,
+                            ),
+                            child: const Text(
+                              'Ulas',
+                              style: TextStyle(
+                                color: AppColors.coklat2,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -211,27 +226,32 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Total Price: Rp${formatPrice(order.totalPrice)}'),
+                Text('Total Price: Rp${formatPrice(order.totalPrice)}',
+                    style: TextStyle(fontSize: 14)),
                 const SizedBox(height: 8),
                 Text(
-                    'Address: ${order.address.title}, ${order.address.address}'),
+                    'Address: ${order.address.title}, ${order.address.address}',
+                    style: TextStyle(fontSize: 14)),
                 const SizedBox(height: 8),
                 const Text(
                   'Items:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 ...order.items.map((item) => ListTile(
                       leading: Image.network(
                         item.imageUrls.isNotEmpty
                             ? item.imageUrls[0]
-                            : 'https://via.placeholder.com/50',
-                        width: 50,
-                        height: 50,
+                            : 'https://via.placeholder.com/100',
+                        width: 100,
+                        height: 100,
                         fit: BoxFit.cover,
                       ),
-                      title: Text(item.productName),
-                      subtitle: Text('Quantity: ${item.quantity}'),
-                      trailing: Text('Rp${formatPrice(item.price)}'),
+                      title: Text(item.productName,
+                          style: TextStyle(fontSize: 14)),
+                      subtitle: Text('Quantity: ${item.quantity}',
+                          style: TextStyle(fontSize: 14)),
+                      trailing: Text('Rp${formatPrice(item.price)}',
+                          style: TextStyle(fontSize: 14)),
                     )),
               ],
             ),
