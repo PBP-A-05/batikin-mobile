@@ -14,12 +14,95 @@ class DisplayCart extends StatefulWidget {
 }
 
 class _DisplayCartState extends State<DisplayCart> {
-  String? selectedSort;
+  Map<int, bool> selectedItems = {};
+  double totalPrice = 0;
+  final String baseUrl = 'http://127.0.0.1:8000';
+
+  void updateTotalPrice(List<CartItem> items) {
+    double total = 0;
+    for (var item in items) {
+      if (selectedItems[item.id] == true) {
+        final priceString = item.price.replaceAll(RegExp(r'[^0-9]'), '');
+        final price = double.tryParse(priceString) ?? 0;
+        total += price * item.quantity;
+      }
+    }
+    setState(() {
+      totalPrice = total;
+    });
+  }
+
+  Future<void> handleQuantityChange(CartItem item, bool increment, ViewCart cart) async {
+    final request = context.read<CookieRequest>();
+    int newQuantity = increment ? item.quantity + 1 : item.quantity - 1;
+    
+    if (newQuantity < 1) return;
+
+    try {
+      // Menggunakan pbp_django_auth untuk update quantity
+      final response = await request.post(
+        '$baseUrl/cart/api/update/${item.id}/',
+        {
+          'quantity': newQuantity.toString(),
+        },
+      );
+
+      // Update UI jika berhasil
+      if (response['status'] == 'success') {
+        setState(() {
+          final index = cart.data.cartItems.indexWhere((i) => i.id == item.id);
+          if (index != -1) {
+            cart.data.cartItems[index].quantity = newQuantity;
+            updateTotalPrice(cart.data.cartItems);
+          }
+        });
+      } else {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Gagal mengupdate jumlah"), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> handleRemoveItem(int itemId, ViewCart cart) async {
+    final request = context.read<CookieRequest>();
+
+    try {
+      // Menggunakan pbp_django_auth untuk remove item
+      final response = await request.post(
+        '$baseUrl/cart/api/remove/$itemId/',
+        {},
+      );
+
+      if (response['status'] == 'success') {
+        setState(() {
+          cart.data.cartItems.removeWhere((item) => item.id == itemId);
+          selectedItems.remove(itemId);
+          updateTotalPrice(cart.data.cartItems);
+        });
+      } else {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Gagal menghapus item"), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
-    final cartService = CartService(request);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
@@ -43,7 +126,7 @@ class _DisplayCartState extends State<DisplayCart> {
         ],
       ),
       body: FutureBuilder<ViewCart>(
-        future: cartService.viewCart(),
+        future: CartService(request).viewCart(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -100,6 +183,8 @@ class _DisplayCartState extends State<DisplayCart> {
                   itemCount: cart.data.cartItems.length,
                   itemBuilder: (context, index) {
                     final item = cart.data.cartItems[index];
+                    selectedItems.putIfAbsent(item.id, () => false);
+
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
                       elevation: 2,
@@ -117,8 +202,13 @@ class _DisplayCartState extends State<DisplayCart> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Checkbox(
-                              value: false,
-                              onChanged: (value) {},
+                              value: selectedItems[item.id] ?? false,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  selectedItems[item.id] = value ?? false;
+                                  updateTotalPrice(cart.data.cartItems);
+                                });
+                              },
                               activeColor: AppColors.coklat2,
                             ),
                             ClipRRect(
@@ -176,8 +266,9 @@ class _DisplayCartState extends State<DisplayCart> {
                                       Row(
                                         children: [
                                           IconButton(
-                                            icon: Icon(Icons.delete_outline, color: AppColors.coklat2),
-                                            onPressed: () {},
+                                            icon: const Icon(Icons.delete_outline),
+                                            onPressed: () => handleRemoveItem(item.id, cart),
+                                            color: AppColors.coklat2,
                                           ),
                                           Container(
                                             decoration: BoxDecoration(
@@ -187,8 +278,11 @@ class _DisplayCartState extends State<DisplayCart> {
                                             child: Row(
                                               children: [
                                                 IconButton(
-                                                  icon: Icon(Icons.remove, color: AppColors.coklat2),
-                                                  onPressed: () {},
+                                                  icon: const Icon(Icons.remove),
+                                                  onPressed: item.quantity > 1 
+                                                    ? () => handleQuantityChange(item, false, cart)
+                                                    : null,
+                                                  color: AppColors.coklat2,
                                                 ),
                                                 Text(
                                                   '${item.quantity}',
@@ -197,8 +291,9 @@ class _DisplayCartState extends State<DisplayCart> {
                                                   ),
                                                 ),
                                                 IconButton(
-                                                  icon: Icon(Icons.add, color: AppColors.coklat2),
-                                                  onPressed: () {},
+                                                  icon: const Icon(Icons.add),
+                                                  onPressed: () => handleQuantityChange(item, true, cart),
+                                                  color: AppColors.coklat2,
                                                 ),
                                               ],
                                             ),
@@ -244,19 +339,13 @@ class _DisplayCartState extends State<DisplayCart> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              FutureBuilder<ViewCart>(
-                future: cartService.viewCart(),
-                builder: (context, snapshot) {
-                  final price = snapshot.data?.data.totalPrice ?? "0";
-                  return Text(
-                    'Rp${_formatNumber(price)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  );
-                },
+              Text(
+                'Rp${_formatNumber(totalPrice.toStringAsFixed(0))}',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               Text(
                 'Beli sekarang!',
@@ -288,7 +377,6 @@ class _DisplayCartState extends State<DisplayCart> {
 
   String _formatNumber(String number) {
     final cleanNumber = number.replaceAll(RegExp(r'[^0-9]'), '');
-    
     final value = double.tryParse(cleanNumber) ?? 0;
     final parts = value.toStringAsFixed(0).split('');
     final formattedParts = <String>[];
