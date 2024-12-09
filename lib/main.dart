@@ -1,10 +1,12 @@
 // lib/main.dart
 import 'package:batikin_mobile/menu.dart';
+import 'package:batikin_mobile/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/authentication/login_screen.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
 import 'package:batikin_mobile/screens/placeholder/placeholder.dart';
 
 void main() {
@@ -41,8 +43,16 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const MyHomePage(),
+        home: const MyHomePage(
+          username: 'test',
+        ),
         debugShowCheckedModeBanner: false,
+        routes: {
+          '/cart': (context) => const DisplayCart(), // Add the cart route
+          '/placeholder': (context) => const ProfilePage(),
+          '/placerholder': (context) => const ProfilePage(),
+          '/profile': (context) => const ProfilePage(),
+        },
       ),
     );
   }
