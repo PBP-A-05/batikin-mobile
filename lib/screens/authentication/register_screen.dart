@@ -1,9 +1,9 @@
 // lib/screens/authentication/register.dart
 import 'package:flutter/material.dart';
-import 'package:batikin_mobile/screens/authentication/login.dart';
+import 'package:batikin_mobile/screens/authentication/login_screen.dart';
 import 'package:batikin_mobile/services/auth_service.dart';
 import 'package:provider/provider.dart';
-import 'package:batikin_mobile/constant/colors.dart';
+import 'package:batikin_mobile/constants/colors.dart';
 import 'package:batikin_mobile/widgets/custom_text_field.dart';
 import 'package:batikin_mobile/widgets/custom_button.dart'; // Import CustomButton
 import 'package:pbp_django_auth/pbp_django_auth.dart';

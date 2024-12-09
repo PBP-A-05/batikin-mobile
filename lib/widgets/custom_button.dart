@@ -1,6 +1,6 @@
 // lib/widgets/custom_button.dart
 import 'package:flutter/material.dart';
-import 'package:batikin_mobile/constant/colors.dart';
+import 'package:batikin_mobile/constants/colors.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
