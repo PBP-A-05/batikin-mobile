@@ -115,23 +115,50 @@ Laporan lengkap mengenai progress pengerjaan kelompok:
 
 Tautan aplikasi akan diperbarui setelah rilis:  
 [**Tautan Deployment Aplikasi Batikin**]
-
+Ini cuman contoh, please follow the structure!
 ## Project Structure
 ```plaintext
 lib/
 ├── constant/
-│   ├── colors.dart           # Contains color constants used across the app
-│   ├── fonts.dart            # Contains font style constants
+│   ├── colors.dart             # Contains color constants used across the app
+│   ├── fonts.dart              # Contains font style constants
 ├── screens/
-│   └── login/ (ganti jadi nama modul kalian)
-│       ├── models/
-│       │   ├── user_model.dart     # Defines the user model
-│       │   ├── auth_model.dart     # Defines authentication-related models
-│       ├── services/
-│       │   ├── auth_service.dart   # Handles authentication logic
-│       │   ├── api_service.dart    # Manages API calls
+│   ├── authentication/         # Module for authentication functionality
+│   │   ├── login_screen.dart       # Main screen for login
+│   │   ├── register_screen.dart    # Main screen for registration
+│   │   ├── widgets/
+│   │   │   ├── login_form.dart        # Widget for login form
+│   │   │   ├── login_button.dart      # Widget for login button
+│   │   │   ├── register_form.dart     # Widget for register form
+│   │   │   ├── register_button.dart   # Widget for register button
+│   │   ├── models/
+│   │   │   ├── user_model.dart         # User model shared between login/register
+│   │   │   ├── auth_model.dart         # Authentication-related models
+│   │   ├── services/
+│   │       ├── auth_service.dart       # Authentication logic (e.g., login/register)
+│   │       ├── api_service.dart        # API calls for authentication
+│
+│   ├── profile/                # Module for profile functionality
+│   │   ├── profile_screen.dart     # Main screen for profile
+│   │   ├── widgets/
+│   │   │   ├── profile_header.dart    # Widget for profile header
+│   │   │   ├── profile_details.dart   # Widget for profile details
+│   │   ├── models/
+│   │   │   ├── user_model.dart         # Profile-specific user model
+│   │   ├── services/
+│   │       ├── profile_service.dart    # Profile-related services
+│
+│   ├── home/                   # Module for home functionality (if needed)
+│       ├── home_screen.dart        # Main screen for the home page
 │       ├── widgets/
-│       │   ├── login_form.dart     # Widget for the login form
-│       │   ├── login_button.dart   # Widget for the login button
-│       └── login_screen.dart       # Main screen for login functionality
+│       │   ├── welcome_banner.dart    # Widget for home welcome banner
+│       │   ├── feature_card.dart      # Widget for feature cards
+├── models/
+│   ├── base_model.dart          # Shared base model (if needed)
+├── widgets/
+│   ├── common_button.dart       # Common reusable button widget
+│   ├── app_header.dart          # App-wide header widget
+├── services/
+│   ├── api_service.dart         # General API service for app-wide calls
+│   ├── local_storage_service.dart # Service to handle local storage
 ```

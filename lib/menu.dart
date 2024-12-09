@@ -4,6 +4,7 @@ import 'package:batikin_mobile/screens/placeholder/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/screens/profile/profile.dart';
 import 'package:batikin_mobile/constant/colors.dart'; // Ensure this path is correct
+import 'package:batikin_mobile/screens/booking/display_workshop.dart'; //tes buat workshop
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -85,6 +86,20 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
+      ),
+      //Tes buat workshop
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DisplayWorkshop(
+                  initialCategory: "Floating Action Example"),
+            ),
+          );
+        },
+        backgroundColor: AppColors.coklat3,
+        child: const Icon(Icons.add),
       ),
     );
   }
