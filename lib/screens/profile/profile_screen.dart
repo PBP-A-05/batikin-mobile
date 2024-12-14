@@ -209,8 +209,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    AlamatPage(addresses: profile.addresses),
+                                builder: (context) => AlamatPage(
+                                    initialAddresses: profile.addresses),
                               ),
                             );
                           },
