@@ -7,6 +7,7 @@ import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the ca
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/profile/profile_screen.dart';
 import 'package:batikin_mobile/constants/colors.dart'; // Ensure this path is correct
+import 'package:batikin_mobile/screens/booking/display_workshop.dart';
 
 class MyHomePage extends StatefulWidget {
   final String username;
@@ -191,7 +192,16 @@ class _MyHomePageState extends State<MyHomePage> {
                               Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const DisplayWorkshop(
+                                                initialCategory: 'Workshop',
+                                              )),
+                                    );
+                                  },
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 12,
