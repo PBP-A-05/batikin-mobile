@@ -6,7 +6,7 @@ import 'package:batikin_mobile/constants/fonts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
-import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; 
 import 'package:batikin_mobile/services/product_service.dart';
 
 class DisplayProduct extends StatefulWidget {
@@ -194,37 +194,30 @@ class _DisplayProductState extends State<DisplayProduct>
                 bottom: false,
                 child: Container(
                   height: kToolbarHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       IconButton(
                         icon: Icon(Icons.arrow_back, color: AppColors.coklat1),
                         onPressed: () => Navigator.pop(context),
                       ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Batikin',
-                            style: TextStyle(
-                              fontFamily: AppFonts.javaneseText,
-                              fontSize: 24,
-                              color: AppColors.coklat1,
-                            ),
-                          ),
-                        ),
+                      const Spacer(),
+                      IconButton(
+                        icon: Icon(Icons.favorite_border, color: AppColors.coklat1),
+                        onPressed: () {/* Implement wishlist */},
                       ),
                       IconButton(
-                        icon:
-                            Icon(Icons.shopping_cart, color: AppColors.coklat1),
+                        icon: Icon(Icons.shopping_cart, color: AppColors.coklat1),
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => const DisplayCart()),
+                            MaterialPageRoute(builder: (context) => const DisplayCart()),
                           );
                         },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.person, color: AppColors.coklat1),
+                        onPressed: () {/* Implement profile */},
                       ),
                     ],
                   ),
