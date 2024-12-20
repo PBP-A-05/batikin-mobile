@@ -7,6 +7,9 @@ import 'package:batikin_mobile/screens/cart/display_cart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/profile/profile_screen.dart';
 import 'package:batikin_mobile/constants/colors.dart'; 
+import 'package:http/http.dart' as http;
+import 'package:batikin_mobile/models/product.dart';
+import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
 
 class MyHomePage extends StatefulWidget {
   final String username;
@@ -17,9 +20,72 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+String _getCategoryDisplayName(String category) {
+  switch (category) {
+    case 'pakaian_pria':
+      return 'Pakaian Pria';
+    case 'pakaian_wanita':
+      return 'Pakaian Wanita';
+    case 'aksesoris':
+      return 'Aksesoris';
+    default:
+      return 'Lainnya';
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController(viewportFraction: 0.8);
+
+  List<Product> recommendedProducts = [];
+  bool isLoadingRecommendations = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRecommendedProducts();
+    // ... existing code
+  }
+
+  Future<void> fetchRecommendedProducts() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/shopping/json/'),
+      );
+      if (response.statusCode == 200) {
+        final allProducts = productFromJson(response.body);
+        
+        // Get 3 random products from each category
+        final categorizedProducts = {
+          'pakaian_pria': [],
+          'pakaian_wanita': [],
+          'aksesoris': [],
+        };
+
+        for (var product in allProducts) {
+          categorizedProducts[product.fields.category]?.add(product);
+        }
+
+        final randomProducts = [];
+        categorizedProducts.forEach((category, products) {
+          products.shuffle();
+          randomProducts.addAll(products.take(3));
+        });
+        
+        // Shuffle again to mix categories
+        randomProducts.shuffle();
+
+        setState(() {
+          recommendedProducts = randomProducts.cast<Product>();
+          isLoadingRecommendations = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoadingRecommendations = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                           style: GoogleFonts.poppins(
                                             color: Colors.white,
                                             fontSize: 12,
-                                            fontWeight: FontWeight.w600,
+                                            // Removed fontWeight: FontWeight.w600
                                           ),
                                         ),
                                       ),
@@ -275,6 +341,207 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ),
+
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        children: [
+                          Text(
+                            'Rekomendasi untuk Anda',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              foreground: Paint()
+                                ..shader = AppColors.bgGradientCoklat.createShader(
+                                  const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                                ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: const Color(0xFFDCD2C2),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        'Batik untuk setiap momen, temukan favoritmu di sini.',
+                        style: TextStyle(
+                          fontFamily: AppFonts.javaneseText,
+                          fontSize: 14,
+                          color: AppColors.coklat2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Product Grid
+                      if (isLoadingRecommendations)
+                        const Center(child: CircularProgressIndicator())
+                      else
+                        GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, 
+                            childAspectRatio: 0.75,
+                            crossAxisSpacing: 12, 
+                            mainAxisSpacing: 12,
+                          ),
+                          itemCount: recommendedProducts.length + 1, 
+                          itemBuilder: (context, index) {
+                            if (index == recommendedProducts.length) {
+                              
+                              return Align( 
+                                alignment: Alignment.center,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center, 
+                                  children: [
+                                    Material(
+                                      color: Colors.transparent,
+                                      shape: const CircleBorder(),
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => DisplayProduct(initialCategory: 'pakaian_wanita'), // Set default category
+                                            ),
+                                          );
+                                        },
+                                        customBorder: const CircleBorder(),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.coklat1,
+                                          ),
+                                          child: const Icon(
+                                            Icons.arrow_forward,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Temukan lebih banyak!',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        color: AppColors.coklat1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            final product = recommendedProducts[index];
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DisplayProductDetail(
+                                        productId: product.pk,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(4),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Product Image
+                                      Expanded(
+                                        child: ClipRRect(
+                                          borderRadius: const BorderRadius.vertical(
+                                            top: Radius.circular(4)
+                                          ),
+                                          child: Image.network(
+                                            product.fields.imageUrls[0],
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Product Info
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.vertical(
+                                            bottom: Radius.circular(4)
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Category Label
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 6,
+                                                vertical: 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: const Color(0xFFDCD2C2),
+                                                  width: 1,
+                                                ),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                _getCategoryDisplayName(product.fields.category),
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 8,
+                                                  color: AppColors.coklat3,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+
+                                            Text(
+                                              product.fields.productName,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.coklat1,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -287,7 +554,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: MediaQuery.of(context).padding.top + 56,
               color: Colors.white,
               padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top), // Add padding for status bar
-              child: Center( // Use Center instead of Align
+              child: Center( 
                 child: Text(
                   'Batikin',
                   style: TextStyle(
@@ -321,7 +588,6 @@ class _MyHomePageState extends State<MyHomePage> {
             currentIndex: _currentIndex,
             onTap: (index) {
               if (index == 2) {
-                // Cart index
                 Navigator.pushNamed(context, '/cart');
               } else {
                 setState(() {
