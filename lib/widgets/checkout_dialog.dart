@@ -71,11 +71,8 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
               style: GoogleFonts.poppins(color: Colors.white),
             ),
             backgroundColor: AppColors.coklat2,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: EdgeInsets.all(16),
+            behavior: SnackBarBehavior.fixed,
+            duration: const Duration(milliseconds: 3500), 
           ),
         );
       }
@@ -93,215 +90,240 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.white,  // White background
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Ringkasan Pemesanan',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.coklat2,
-                ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 3500), 
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.2), 
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.elasticOut, 
+                reverseCurve: Curves.easeInBack,
               ),
-              const Divider(),
-              ...widget.selectedItems.map((item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Image.network(item.imageUrls[0], width: 50, height: 50),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.productName,
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.coklat3,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.coklat1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              _getCategoryDisplayName(item.category),
+            ),
+            child: FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut,
+              ),
+              child: child,
+            ),
+          );
+        },
+        child: SingleChildScrollView(
+          key: const ValueKey<String>('dialog_content'),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ringkasan Pemesanan',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.coklat2,
+                  ),
+                ),
+                const Divider(),
+                ...widget.selectedItems.map((item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Image.network(item.imageUrls[0], width: 50, height: 50),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.productName,
                               style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: AppColors.coklat2,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.coklat3,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8), 
-                          Text(
-                            '${item.quantity} item',
-                            style: GoogleFonts.poppins(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Rp${_formatNumber(item.price)}', 
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.coklat1, 
-                          fontSize: 14,
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppColors.coklat1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _getCategoryDisplayName(item.category),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  color: AppColors.coklat2,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8), 
+                            Text(
+                              '${item.quantity} item',
+                              style: GoogleFonts.poppins(fontSize: 12),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              )),
-              const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Rp${_formatNumber(item.price)}', 
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.coklat1, 
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    'Rp${_formatNumber(widget.totalPrice.toStringAsFixed(0))}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.coklat2,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Pilih Alamat Pengiriman',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Divider(),
-              if (isLoading)
-                const Center(child: CircularProgressIndicator())
-              else if (addresses.isEmpty)
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                )),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Anda belum memiliki alamat.',
-                      style: GoogleFonts.poppins(),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/profile');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.coklat2,
+                      'Total',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: const Text('Tambah Alamat'),
+                    ),
+                    Text(
+                      'Rp${_formatNumber(widget.totalPrice.toStringAsFixed(0))}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.coklat2,
+                      ),
                     ),
                   ],
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(left: 0),
-                  child: Column(
-                    children: addresses.map((address) => Theme(
-                      data: Theme.of(context).copyWith(
-                        radioTheme: RadioThemeData(
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                      child: RadioListTile<int>(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          address.title,
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        subtitle: Text(
-                          address.address,
-                          style: GoogleFonts.poppins(fontSize: 12),
-                        ),
-                        value: address.id,
-                        groupValue: selectedAddressId,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedAddressId = value;
-                          });
-                        },
-                      ),
-                    )).toList(),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Pilih Alamat Pengiriman',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Batal',
-                      style: GoogleFonts.poppins(color: AppColors.coklat1),
+                const Divider(),
+                if (isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (addresses.isEmpty)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Anda belum memiliki alamat.',
+                        style: GoogleFonts.poppins(),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/profile');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.coklat2,
+                        ),
+                        child: const Text('Tambah Alamat'),
+                      ),
+                    ],
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(left: 0),
+                    child: Column(
+                      children: addresses.map((address) => Theme(
+                        data: Theme.of(context).copyWith(
+                          radioTheme: RadioThemeData(
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                        child: RadioListTile<int>(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            address.title,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            address.address,
+                            style: GoogleFonts.poppins(fontSize: 12),
+                          ),
+                          value: address.id,
+                          groupValue: selectedAddressId,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedAddressId = value;
+                            });
+                          },
+                        ),
+                      )).toList(),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: addresses.isEmpty || selectedAddressId == null
-                        ? null
-                        : createOrder,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero, 
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Batal',
+                        style: GoogleFonts.poppins(color: AppColors.coklat1),
                       ),
-                      disabledBackgroundColor: Colors.grey,
                     ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: addresses.isEmpty || selectedAddressId == null
-                            ? null
-                            : AppColors.bgGradientCoklat,
-                        borderRadius: BorderRadius.circular(30),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: addresses.isEmpty || selectedAddressId == null
+                          ? null
+                          : createOrder,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero, 
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        disabledBackgroundColor: Colors.grey,
                       ),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                        child: Text(
-                          'Buat Pesanan',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: addresses.isEmpty || selectedAddressId == null
+                              ? null
+                              : AppColors.bgGradientCoklat,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          child: Text(
+                            'Buat Pesanan',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
