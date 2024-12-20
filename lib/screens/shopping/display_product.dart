@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
 import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
-import 'package:batikin_mobile/config/config.dart';
+import 'package:batikin_mobile/services/product_service.dart';
 
 class DisplayProduct extends StatefulWidget {
   final String initialCategory;
@@ -26,6 +26,7 @@ class _DisplayProductState extends State<DisplayProduct>
   List<Product> products = [];
   bool isLoading = true;
   late String selectedCategory;
+  final ProductService _productService = ProductService();
 
   @override
   void initState() {
@@ -54,15 +55,11 @@ class _DisplayProductState extends State<DisplayProduct>
 
   Future<void> fetchProducts() async {
     try {
-      final response = await http.get(
-        Uri.parse('${Config.baseUrl}/shopping/json/'),
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          products = productFromJson(response.body);
-          isLoading = false;
-        });
-      }
+      final fetchedProducts = await _productService.fetchProducts();
+      setState(() {
+        products = fetchedProducts;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -238,7 +235,6 @@ class _DisplayProductState extends State<DisplayProduct>
         ],
       ),
 
-      // Floating Navigation Bar
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(

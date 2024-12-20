@@ -6,7 +6,6 @@ import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:batikin_mobile/models/view_cart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/constants/colors.dart';
-import 'package:batikin_mobile/config/config.dart';
 
 class DisplayCart extends StatefulWidget {
   const DisplayCart({super.key});
@@ -80,12 +79,7 @@ class _DisplayCartState extends State<DisplayCart> {
     if (newQuantity < 1) return;
 
     try {
-      final response = await request.post(
-        '${Config.baseUrl}/cart/api/update/${item.id}/',
-        {
-          'quantity': newQuantity.toString(),
-        },
-      );
+      final response = await CartService(request).updateCartItem(item.id, newQuantity);
 
       if (response['status'] == 'success') {
         setState(() {
@@ -116,10 +110,7 @@ class _DisplayCartState extends State<DisplayCart> {
     final request = context.read<CookieRequest>();
 
     try {
-      final response = await request.post(
-        '${Config.baseUrl}/cart/api/remove/$itemId/',
-        {},
-      );
+      final response = await CartService(request).removeCartItem(itemId);
 
       if (response['status'] == 'success') {
         setState(() {

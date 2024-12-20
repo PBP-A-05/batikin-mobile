@@ -50,4 +50,22 @@ class CartService {
     );
     return order_models.CreateOrder.fromJson(response);
   }
+
+  Future<Map<String, dynamic>> updateCartItem(int itemId, int quantity) async {
+    final response = await request.post(
+      '${Config.baseUrl}/cart/api/update/$itemId/',
+      {
+        'quantity': quantity.toString(),
+      },
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> removeCartItem(int itemId) async {
+    final response = await request.post(
+      '${Config.baseUrl}/cart/api/remove/$itemId/',
+      {},
+    );
+    return response;
+  }
 }

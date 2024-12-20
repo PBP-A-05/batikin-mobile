@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:batikin_mobile/config/config.dart';
+import 'package:batikin_mobile/services/product_service.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -27,6 +27,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   bool isLiked = false;
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
+  final ProductService _productService = ProductService();
 
   @override
   void initState() {
@@ -42,17 +43,11 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
 
   Future<void> fetchProductDetail() async {
     try {
-      final response = await http.get(
-        Uri.parse('${Config.baseUrl}/shopping/json/${widget.productId}/'),
-      );
-      if (response.statusCode == 200) {
-        final products = productDetailFromJson(response.body);
-        setState(() {
-          product = products
-              .first; 
-          isLoading = false;
-        });
-      }
+      final productDetail = await _productService.fetchProductDetail(widget.productId);
+      setState(() {
+        product = productDetail;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
