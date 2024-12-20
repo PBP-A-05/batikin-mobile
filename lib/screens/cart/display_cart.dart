@@ -6,6 +6,7 @@ import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:batikin_mobile/models/view_cart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/constants/colors.dart';
+import 'package:batikin_mobile/config/config.dart';
 
 class DisplayCart extends StatefulWidget {
   const DisplayCart({super.key});
@@ -17,7 +18,6 @@ class DisplayCart extends StatefulWidget {
 class _DisplayCartState extends State<DisplayCart> {
   Map<int, bool> selectedItems = {};
   double totalPrice = 0;
-  final String baseUrl = 'http://127.0.0.1:8000';
   ViewCart? cartData;
   bool isLoading = true;
   String _selectedSort = '';
@@ -81,7 +81,7 @@ class _DisplayCartState extends State<DisplayCart> {
 
     try {
       final response = await request.post(
-        '$baseUrl/cart/api/update/${item.id}/',
+        '${Config.baseUrl}/cart/api/update/${item.id}/',
         {
           'quantity': newQuantity.toString(),
         },
@@ -117,7 +117,7 @@ class _DisplayCartState extends State<DisplayCart> {
 
     try {
       final response = await request.post(
-        '$baseUrl/cart/api/remove/$itemId/',
+        '${Config.baseUrl}/cart/api/remove/$itemId/',
         {},
       );
 
@@ -188,7 +188,7 @@ class _DisplayCartState extends State<DisplayCart> {
       ),
     ).then((success) {
       if (success == true) {
-        loadCartData(); // Refresh cart after successful order
+        loadCartData(); 
       }
     });
   }

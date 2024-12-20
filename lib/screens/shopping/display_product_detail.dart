@@ -3,11 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:batikin_mobile/models/product_detail.dart';
 import 'package:batikin_mobile/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; 
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:batikin_mobile/config/config.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -42,7 +43,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   Future<void> fetchProductDetail() async {
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/shopping/json/${widget.productId}/'),
+        Uri.parse('${Config.baseUrl}/shopping/json/${widget.productId}/'),
       );
       if (response.statusCode == 200) {
         final products = productDetailFromJson(response.body);
@@ -81,7 +82,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             slivers: [
               const SliverToBoxAdapter(
                 child:
-                    SizedBox(height: kToolbarHeight + 32), // Increased spacing
+                    SizedBox(height: kToolbarHeight + 32), 
               ),
 
               SliverToBoxAdapter(
@@ -225,7 +226,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             ],
           ),
 
-          // Fixed AppBar
           _buildAppBar(),
 
           Positioned(
