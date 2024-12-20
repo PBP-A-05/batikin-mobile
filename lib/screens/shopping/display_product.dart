@@ -373,6 +373,10 @@ class _DisplayProductState extends State<DisplayProduct>
                 offset: const Offset(0, 2),
               ),
             ],
+            border: Border.all( 
+              color: AppColors.coklat1.withOpacity(0.25),
+              width: 1,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -10,6 +10,7 @@ import 'package:batikin_mobile/constants/colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:batikin_mobile/models/product.dart';
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
+import 'package:batikin_mobile/config/config.dart';
 
 class MyHomePage extends StatefulWidget {
   final String username;
@@ -44,18 +45,16 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     fetchRecommendedProducts();
-    // ... existing code
   }
 
   Future<void> fetchRecommendedProducts() async {
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/shopping/json/'),
+        Uri.parse('${Config.baseUrl}/shopping/json/'), 
       );
       if (response.statusCode == 200) {
         final allProducts = productFromJson(response.body);
         
-        // Get 3 random products from each category
         final categorizedProducts = {
           'pakaian_pria': [],
           'pakaian_wanita': [],
@@ -72,7 +71,6 @@ class _MyHomePageState extends State<MyHomePage> {
           randomProducts.addAll(products.take(3));
         });
         
-        // Shuffle again to mix categories
         randomProducts.shuffle();
 
         setState(() {
@@ -159,7 +157,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                           style: GoogleFonts.poppins(
                                             color: Colors.white,
                                             fontSize: 12,
-                                            // Removed fontWeight: FontWeight.w600
                                           ),
                                         ),
                                       ),
@@ -347,7 +344,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header
                       Row(
                         children: [
                           Text(
@@ -380,7 +376,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Product Grid
                       if (isLoadingRecommendations)
                         const Center(child: CircularProgressIndicator())
                       else
@@ -466,11 +461,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                         offset: const Offset(0, 2),
                                       ),
                                     ],
+                                    border: Border.all( 
+                                      color: AppColors.coklat1.withOpacity(0.25),
+                                      width: 1,
+                                    ),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Product Image
                                       Expanded(
                                         child: ClipRRect(
                                           borderRadius: const BorderRadius.vertical(
@@ -484,7 +482,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ),
                                       ),
 
-                                      // Product Info
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: const BoxDecoration(
@@ -496,7 +493,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            // Category Label
                                             Container(
                                               padding: const EdgeInsets.symmetric(
                                                 horizontal: 6,
@@ -553,7 +549,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               height: MediaQuery.of(context).padding.top + 56,
               color: Colors.white,
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top), // Add padding for status bar
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top), 
               child: Center( 
                 child: Text(
                   'Batikin',
