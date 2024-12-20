@@ -1,3 +1,4 @@
+import 'package:batikin_mobile/widgets/checkout_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
@@ -166,13 +167,38 @@ class _DisplayCartState extends State<DisplayCart> {
     }
   }
 
+  void showCheckoutDialog() {
+    if (!selectedItems.values.contains(true)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pilih minimal satu produk untuk dibeli'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => CheckoutDialog(
+        selectedItems: cartData!.data.cartItems
+            .where((item) => selectedItems[item.id] == true)
+            .toList(),
+        totalPrice: totalPrice,
+      ),
+    ).then((success) {
+      if (success == true) {
+        loadCartData(); // Refresh cart after successful order
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
-        backgroundColor:
-            Colors.white, 
+        backgroundColor: Colors.white,
         elevation: 2,
         shadowColor: AppColors.coklat1.withOpacity(0.15),
         leading: IconButton(
@@ -219,8 +245,7 @@ class _DisplayCartState extends State<DisplayCart> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: PopupMenuButton<String>(
-                              color: Colors
-                                  .white, 
+                              color: Colors.white,
                               onSelected: (value) {
                                 if (value.isNotEmpty) {
                                   handleSort(value);
@@ -232,8 +257,7 @@ class _DisplayCartState extends State<DisplayCart> {
                                     value: option['value']!,
                                     enabled: option['disabled'] == 'false',
                                     child: Container(
-                                      color: Colors
-                                          .white, 
+                                      color: Colors.white,
                                       child: Text(
                                         option['label']!,
                                         style: GoogleFonts.poppins(
@@ -456,48 +480,67 @@ class _DisplayCartState extends State<DisplayCart> {
                   ],
                 ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 32,
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            gradient: AppColors.bgGradientCoklat,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+      floatingActionButton: cartData == null || cartData!.data.cartItems.isEmpty
+          ? null 
+          : Container(
+              height: 56,
+              margin: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: 32,
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Rp${_formatNumber(totalPrice.toStringAsFixed(0))}',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              decoration: BoxDecoration(
+                gradient: AppColors.bgGradientCoklat,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 24),
+                      child: Text(
+                        'Rp${_formatNumber(totalPrice.toStringAsFixed(0))}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: showCheckoutDialog,
+                        borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'Beli sekarang!',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                'Beli sekarang!',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 

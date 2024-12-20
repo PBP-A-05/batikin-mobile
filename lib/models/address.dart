@@ -1,22 +1,22 @@
 // To parse this JSON data, do
 //
-//     final adress = adressFromJson(jsonString);
+//     final address = addressFromJson(jsonString);
 
 import 'dart:convert';
 
-Adress adressFromJson(String str) => Adress.fromJson(json.decode(str));
+Address addressFromJson(String str) => Address.fromJson(json.decode(str));
 
-String adressToJson(Adress data) => json.encode(data.toJson());
+String addressToJson(Address data) => json.encode(data.toJson());
 
-class Adress {
-    List<Address> addresses;
+class Address {
+    List<AddressElement> addresses;
 
-    Adress({
+    Address({
         required this.addresses,
     });
 
-    factory Adress.fromJson(Map<String, dynamic> json) => Adress(
-        addresses: List<Address>.from(json["addresses"].map((x) => Address.fromJson(x))),
+    factory Address.fromJson(Map<String, dynamic> json) => Address(
+        addresses: List<AddressElement>.from(json["addresses"].map((x) => AddressElement.fromJson(x))),
     );
 
     Map<String, dynamic> toJson() => {
@@ -24,18 +24,18 @@ class Adress {
     };
 }
 
-class Address {
+class AddressElement {
     int id;
     String title;
     String address;
 
-    Address({
+    AddressElement({
         required this.id,
         required this.title,
         required this.address,
     });
 
-    factory Address.fromJson(Map<String, dynamic> json) => Address(
+    factory AddressElement.fromJson(Map<String, dynamic> json) => AddressElement(
         id: json["id"],
         title: json["title"],
         address: json["address"],
