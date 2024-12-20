@@ -309,12 +309,16 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16, 
+                            vertical: 8,    
+                          ),
                           child: Text(
                             'Buat Pesanan',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
+                              fontSize: 14,    
                             ),
                           ),
                         ),

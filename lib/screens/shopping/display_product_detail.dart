@@ -651,14 +651,15 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         ),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
+                            horizontal: 16, 
+                            vertical: 8,   
                           ),
                           child: Text(
                             'Ya, Lanjutkan',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
+                              fontSize: 14,    
                             ),
                           ),
                         ),
