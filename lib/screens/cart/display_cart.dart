@@ -172,7 +172,7 @@ class _DisplayCartState extends State<DisplayCart> {
       backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
         backgroundColor:
-            Colors.white, // Ensure the header background color is white
+            Colors.white, 
         elevation: 2,
         shadowColor: AppColors.coklat1.withOpacity(0.15),
         leading: IconButton(
@@ -220,7 +220,7 @@ class _DisplayCartState extends State<DisplayCart> {
                             ),
                             child: PopupMenuButton<String>(
                               color: Colors
-                                  .white, // Ensure the background color of the dropdown is white
+                                  .white, 
                               onSelected: (value) {
                                 if (value.isNotEmpty) {
                                   handleSort(value);
@@ -233,7 +233,7 @@ class _DisplayCartState extends State<DisplayCart> {
                                     enabled: option['disabled'] == 'false',
                                     child: Container(
                                       color: Colors
-                                          .white, // Ensure each item has a white background
+                                          .white, 
                                       child: Text(
                                         option['label']!,
                                         style: GoogleFonts.poppins(
