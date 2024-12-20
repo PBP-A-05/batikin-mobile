@@ -48,7 +48,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
         final products = productDetailFromJson(response.body);
         setState(() {
           product = products
-              .first; // Mengambil item pertama karena API mengembalikan list
+              .first; 
           isLoading = false;
         });
       }
@@ -77,23 +77,20 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Main Content
           CustomScrollView(
             slivers: [
-              // Spacing for AppBar with increased gap
               const SliverToBoxAdapter(
                 child:
                     SizedBox(height: kToolbarHeight + 32), // Increased spacing
               ),
 
-              // Product Image with adjusted size
               SliverToBoxAdapter(
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
                       height: MediaQuery.of(context).size.width *
-                          0.8, // Reduced height
+                          0.8, 
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (index) {
@@ -105,7 +102,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                           const BouncingScrollPhysics(
                             decelerationRate: ScrollDecelerationRate.fast,
                           ),
-                        ), // Adjusted scroll physics
+                        ), 
                         itemCount: product!.fields.imageUrls.length,
                         itemBuilder: (context, index) {
                           return Container(
@@ -114,14 +111,13 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                               image: DecorationImage(
                                 image: NetworkImage(
                                     product!.fields.imageUrls[index]),
-                                fit: BoxFit.contain, // Changed to contain
+                                fit: BoxFit.contain, 
                               ),
                             ),
                           );
                         },
                       ),
                     ),
-                    // Dots Indicator
                     Positioned(
                       bottom: 16,
                       child: Row(
@@ -131,8 +127,8 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                             .entries
                             .map((entry) {
                           return Container(
-                            width: 6.0, // Smaller dots
-                            height: 6.0, // Smaller dots
+                            width: 6.0, 
+                            height: 6.0, 
                             margin: const EdgeInsets.symmetric(horizontal: 4.0),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -148,7 +144,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                 ),
               ),
 
-              // Product Details with adjusted spacing
               SliverToBoxAdapter(
                 child: Transform.translate(
                   offset: const Offset(0, -20),
@@ -163,14 +158,14 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(
-                            height: 32), // Increased spacing significantly
+                            height: 32), 
                         _buildCategoryLabel(product!.fields.category),
-                        const SizedBox(height: 12), // Increased spacing
+                        const SizedBox(height: 12), 
 
                         Text(
                           product!.fields.productName,
                           style: GoogleFonts.poppins(
-                            fontSize: 16, // Reduced font size
+                            fontSize: 16, 
                             fontWeight: FontWeight.w600,
                             color: AppColors.coklat1,
                           ),
@@ -182,7 +177,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                             Text(
                               product!.fields.price,
                               style: GoogleFonts.poppins(
-                                fontSize: 18, // Reduced font size
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.coklat2,
                               ),
@@ -203,7 +198,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Like and Quantity Controls
                         Row(
                           children: [
                             _buildLikeButton(),
@@ -215,15 +209,14 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Updated Description Section
-                        const SizedBox(height: 24), // Increased spacing
+                        const SizedBox(height: 24), 
                         const Divider(color: Color(0xFFDCD2C2)),
-                        const SizedBox(height: 16), // Added spacing
+                        const SizedBox(height: 16), 
                         _buildExpandableDescription(),
-                        const SizedBox(height: 16), // Added spacing
+                        const SizedBox(height: 16), 
                         const Divider(
-                            color: Color(0xFFDCD2C2)), // Added bottom divider
-                        const SizedBox(height: 32), // Added bottom spacing
+                            color: Color(0xFFDCD2C2)), 
+                        const SizedBox(height: 32), 
                       ],
                     ),
                   ),
@@ -235,7 +228,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
           // Fixed AppBar
           _buildAppBar(),
 
-          // Floating Action Button
           Positioned(
             bottom: 16,
             left: 16,
@@ -299,15 +291,15 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   Widget _buildCategoryLabel(String category) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: 10, vertical: 4), // Smaller padding
+          horizontal: 10, vertical: 4), 
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.coklat1),
-        borderRadius: BorderRadius.circular(16), // Smaller radius
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         _getCategoryDisplayName(category),
         style: GoogleFonts.poppins(
-          fontSize: 11, // Smaller font size
+          fontSize: 11, 
           color: AppColors.coklat3,
         ),
       ),
@@ -332,7 +324,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(
-              horizontal: 10, vertical: 4), // Smaller padding
+              horizontal: 10, vertical: 4), 
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFDCD2C2)),
             borderRadius: BorderRadius.circular(16),
@@ -342,12 +334,12 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             children: [
               Icon(icon,
                   size: 14,
-                  color: AppColors.coklat3.withOpacity(0.5)), // Smaller icon
+                  color: AppColors.coklat3.withOpacity(0.5)), 
               const SizedBox(width: 4),
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 11, // Smaller font size
+                  fontSize: 11, 
                   color: AppColors.coklat3.withOpacity(0.5),
                 ),
               ),
@@ -568,7 +560,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
     );
   }
 
-  // Helper method to format number with thousand separators
   String _formatNumber(double number) {
     final parts = number.toStringAsFixed(0).split('');
     final formattedParts = <String>[];
