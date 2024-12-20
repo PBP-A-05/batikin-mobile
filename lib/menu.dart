@@ -3,10 +3,10 @@ import 'package:batikin_mobile/constants/colors.dart';
 import 'package:batikin_mobile/constants/fonts.dart';
 import 'package:batikin_mobile/constants/image_strings.dart';
 import 'package:batikin_mobile/screens/shopping/display_product.dart';
-import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/profile/profile_screen.dart';
-import 'package:batikin_mobile/constants/colors.dart'; // Ensure this path is correct
+import 'package:batikin_mobile/constants/colors.dart'; 
 
 class MyHomePage extends StatefulWidget {
   final String username;
@@ -27,19 +27,16 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Main Content
           SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Spacing untuk header
                 SizedBox(height: MediaQuery.of(context).padding.top + 56),
 
-                // Welcome Section dengan Image
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  height: 300,
+                  height: 255, 
                   child: Stack(
                     children: [
                       Image.asset(
@@ -54,23 +51,81 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Selamat datang,',
-                              style: TextStyle(
-                                fontFamily: AppFonts.javaneseText,
-                                fontSize: 18,
-                                color: Colors.white,
+                            if (widget.username.isEmpty || widget.username == 'test') ...[
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Eksplorasi Yogyakarta',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    'bersama Batikin.',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.pushNamed(context, '/profile');
+                                      },
+                                      borderRadius: BorderRadius.circular(30),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.white, width: 2),
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                        child: Text(
+                                          'Daftar sekarang',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 1),
-                            Text(
-                              widget.username,
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                                color: Colors.white,
+                            ] else ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.baseline, 
+                                textBaseline: TextBaseline.alphabetic, 
+                                children: [
+                                  Text(
+                                    'Selamat datang, ',
+                                    style: TextStyle(
+                                      fontFamily: AppFonts.javaneseText,
+                                      fontSize: 22, 
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${widget.username}.',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22, 
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -78,7 +133,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
 
-                // Description Section
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -86,24 +140,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: Text(
-                              'Jelajahi keindahan batik Yogyakarta.',
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                foreground: Paint()
-                                  ..shader =
-                                      AppColors.bgGradientCoklat.createShader(
-                                    const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
-                                  ),
-                              ),
+                          Text(
+                            'Jelajahi keindahan batik Yogyakarta.',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              foreground: Paint()
+                                ..shader =
+                                    AppColors.bgGradientCoklat.createShader(
+                                  const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                                ),
                             ),
                           ),
-                          Container(
-                            width: 100,
-                            height: 1,
-                            color: const Color(0xFFDCD2C2),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: const Color(0xFFDCD2C2),
+                            ),
                           ),
                         ],
                       ),
@@ -120,38 +173,41 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
 
-                // Product Categories Slider
-                SizedBox(
-                  height: 160,
-                  child: PageView(
-                    controller: _pageController,
-                    children: [
-                      _buildCategoryCard(
-                        ImageStrings.temukanPria,
-                        'Temukan',
-                        'Pakaian Pria',
-                        context,
-                        'pakaian_pria',
-                      ),
-                      _buildCategoryCard(
-                        ImageStrings.temukanWanita,
-                        'Temukan',
-                        'Pakaian Wanita',
-                        context,
-                        'pakaian_wanita',
-                      ),
-                      _buildCategoryCard(
-                        ImageStrings.temukanAksesoris,
-                        'Temukan',
-                        'Aksesoris',
-                        context,
-                        'aksesoris',
-                      ),
-                    ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0), 
+                  child: SizedBox(
+                    height: 136, 
+                    child: PageView(
+                      controller: _pageController,
+                      padEnds: false,
+                      clipBehavior: Clip.none,
+                      children: [
+                        _buildCategoryCard(
+                          ImageStrings.temukanPria,
+                          'Temukan',
+                          'Pakaian Pria',
+                          context,
+                          'pakaian_pria',
+                        ),
+                        _buildCategoryCard(
+                          ImageStrings.temukanWanita,
+                          'Temukan',
+                          'Pakaian Wanita',
+                          context,
+                          'pakaian_wanita',
+                        ),
+                        _buildCategoryCard(
+                          ImageStrings.temukanAksesoris,
+                          'Temukan',
+                          'Aksesoris',
+                          context,
+                          'aksesoris',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
-                // Workshop Section
                 Container(
                   height: 180,
                   margin: const EdgeInsets.symmetric(vertical: 16),
@@ -223,7 +279,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
 
-          // App Header (on top of everything)
           Positioned(
             top: 0,
             left: 0,
@@ -231,8 +286,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               height: MediaQuery.of(context).padding.top + 56,
               color: Colors.white,
-              child: Align(
-                alignment: Alignment.center,
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top), // Add padding for status bar
+              child: Center( // Use Center instead of Align
                 child: Text(
                   'Batikin',
                   style: TextStyle(
@@ -313,8 +368,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildCategoryCard(String imagePath, String title1, String title2,
       BuildContext context, String category) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: MediaQuery.of(context).size.width * 0.7,
+      margin: const EdgeInsets.only(right: 4), 
+      width: MediaQuery.of(context).size.width * 0.5, 
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
