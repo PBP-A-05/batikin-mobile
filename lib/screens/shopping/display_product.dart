@@ -73,6 +73,20 @@ class _DisplayProductState extends State<DisplayProduct>
         .toList();
   }
 
+  void _showLoginRequiredSnackBar(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Masuk ke Batikin untuk melihat $feature!',
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
+        backgroundColor: AppColors.coklat2,
+        behavior: SnackBarBehavior.fixed,
+        duration: const Duration(milliseconds: 3500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -342,6 +356,13 @@ class _DisplayProductState extends State<DisplayProduct>
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
+          final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+          
+          if (username.isEmpty || username == 'test') {
+            _showLoginRequiredSnackBar('detail produk');
+            return;
+          }
+          
           Navigator.push(
             context,
             MaterialPageRoute(

@@ -85,6 +85,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void _showLoginRequiredSnackBar(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Masuk ke Batikin untuk melihat $feature!',
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
+        backgroundColor: AppColors.coklat2,
+        behavior: SnackBarBehavior.fixed,
+        duration: const Duration(milliseconds: 3500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -402,10 +416,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                       shape: const CircleBorder(),
                                       child: InkWell(
                                         onTap: () {
+                                          if (widget.username.isEmpty || widget.username == 'test') {
+                                            _showLoginRequiredSnackBar('koleksi produk');
+                                            return;
+                                          }
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => DisplayProduct(initialCategory: 'pakaian_wanita'), // Set default category
+                                              builder: (context) => DisplayProduct(initialCategory: 'pakaian_wanita'),
                                             ),
                                           );
                                         },
@@ -441,12 +459,17 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
+                                  if (widget.username.isEmpty || widget.username == 'test') {
+                                    _showLoginRequiredSnackBar('detail produk');
+                                    return;
+                                  }
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => DisplayProductDetail(
                                         productId: product.pk,
                                       ),
+                                      settings: RouteSettings(arguments: widget.username), 
                                     ),
                                   );
                                 },
@@ -583,14 +606,16 @@ class _MyHomePageState extends State<MyHomePage> {
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) {
+              if (widget.username.isEmpty || widget.username == 'test') {
+                if (index == 2) { 
+                  _showLoginRequiredSnackBar('keranjang');
+                  return;
+                }
+              }
+              
               if (index == 2) {
                 Navigator.pushNamed(context, '/cart');
-              } else {
-                setState(() {
-                  _currentIndex = index;
-                });
-              }
-              if (index == 3) {
+              } else if (index == 3) {
                 Navigator.pushNamed(context, '/profile');
               } else {
                 setState(() {
@@ -629,72 +654,93 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildCategoryCard(String imagePath, String title1, String title2,
       BuildContext context, String category) {
-    return Container(
-      margin: const EdgeInsets.only(right: 4), 
-      width: MediaQuery.of(context).size.width * 0.5, 
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            spreadRadius: 0,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DisplayProduct(initialCategory: category),
+            settings: RouteSettings(arguments: widget.username),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DisplayProduct(initialCategory: category),
-              ),
-            );
-          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 4), 
+        width: MediaQuery.of(context).size.width * 0.5, 
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          child: ClipRRect(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 0,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DisplayProduct(initialCategory: category),
+                ),
+              );
+            },
             borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              children: [
-                Image.asset(
-                  imagePath,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                Positioned(
-                  left: 12,
-                  bottom: 12,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title1,
-                        style: TextStyle(
-                          fontFamily: AppFonts.javaneseText,
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        title2,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(
+                children: [
+                  Image.asset(
+                    imagePath,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
                   ),
-                ),
-              ],
+                  Positioned(
+                    left: 12,
+                    bottom: 12,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title1,
+                          style: TextStyle(
+                            fontFamily: AppFonts.javaneseText,
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          title2,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _onCategorySelected(String category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DisplayProduct(initialCategory: category),
+        settings: RouteSettings(arguments: widget.username),
       ),
     );
   }
