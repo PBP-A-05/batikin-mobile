@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:batikin_mobile/models/product_detail.dart';
 import 'package:batikin_mobile/constant/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
-import 'package:batikin_mobile/screens/comments_review/comment_page.dart';  // Add this import
+import 'package:batikin_mobile/screens/comments_review/comment_page.dart';
+import 'package:batikin_mobile/models/comment_model.dart';
+import 'package:batikin_mobile/screens/comments_review/comment_card.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -23,11 +26,13 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   bool isLiked = false;
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
+  List<Review> reviews = [];
 
   @override
   void initState() {
     super.initState();
     fetchProductDetail();
+    fetchReviews();
   }
 
   @override
@@ -52,6 +57,23 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> fetchReviews() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/review/get-reviews/${widget.productId}/'),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          reviews = reviewFromJson(response.body);
+        });
+      } else {
+        print('Failed to load reviews');
+      }
+    } catch (e) {
+      print('Error fetching reviews: $e');
     }
   }
 
@@ -227,9 +249,8 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => CommentPage(
-                            productId: widget.productId,
-                            productName: product?.fields.name ?? 'Product',
-                            shopId: product?.fields.shopId ?? 0, // Use actual shop ID or default to 0
+                            productId: product?.pk ?? '',
+                            productName: product?.fields.productName ?? 'Product',
                           ),
                         ),
                       );
@@ -259,6 +280,16 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                   ),
                 ),
               ),
+
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    const Divider(color: Color(0xFFDCD2C2)),
+                    _buildReviewsSection(),
+                    const SizedBox(height: 80), // Add some bottom padding
+                  ],
+                ),
+              ),
             ],
           ),
 
@@ -275,42 +306,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
               children: [
                 _buildFloatingActionButton(), // Existing wishlist button
                 const SizedBox(height: 8), // Spacing between buttons
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentPage(
-                          productId: widget.productId,
-                          productName: product?.fields.name ?? 'Product',
-                          shopId: int.parse(product?.fields.shopId ?? '0'), // Convert string to int
-                        ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.coklat1,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50), // Makes button full width
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.rate_review),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Tambahkan Ulasan',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -625,5 +620,39 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
       default:
         return category;
     }
+  }
+
+  Widget _buildReviewsSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ulasan Produk',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (reviews.isEmpty)
+            Center(
+              child: Text(
+                'Belum ada ulasan',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          else
+            Column(
+              children: reviews.map((review) => CommentCard(review: review)).toList(),
+            ),
+        ],
+      ),
+    );
   }
 }

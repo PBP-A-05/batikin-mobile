@@ -64,10 +64,6 @@ class Fields {
         category: json["category"],
     );
 
-  get name => null;
-
-  get shopId => null;
-
     Map<String, dynamic> toJson() => {
         "store_url": storeUrl,
         "store_address": storeAddress,

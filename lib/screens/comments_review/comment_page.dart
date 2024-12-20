@@ -6,11 +6,17 @@ import 'package:batikin_mobile/widgets/custom_text_field.dart';
 import 'package:batikin_mobile/widgets/custom_button.dart'; // Import CustomButton
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
 
 class CommentPage extends StatefulWidget {
-  final int shopId;
+  final String productId;
+  final String productName;
 
-  const CommentPage({Key? key, required this.shopId, required String productId, required productName}) : super(key: key);
+  const CommentPage({
+    Key? key,
+    required this.productId,
+    required this.productName,
+  }) : super(key: key);
 
   @override
   _CommentPageState createState() => _CommentPageState();
@@ -21,16 +27,33 @@ class _CommentPageState extends State<CommentPage> {
   final _formKey = GlobalKey<FormState>();
   double _rating = 0;
 
-  Future<List<dynamic>> fetchComments() async {
-   final request = context.watch<CookieRequest>();
-    try {
-      // Adjust the URL to match your Django endpoint
-      final response = await request.get(
-        'http://127.0.0.1:8000/review/get-comments/${widget.shopId}/',
-      );
-      return response['comments'];
-    } catch (e) {
-      print('Error fetching comments: $e');
+  Future<List<dynamic>> fetchReviews() async {
+  final request = context.read<CookieRequest>();
+  try {
+    
+    final response = await request.get(
+      'http://127.0.0.1:8000/review/json/${widget.productId}/',
+    );
+    
+    if (response == null) {
+      print('Response is null');
+      return [];
+    }
+
+    // If response is a List, process each review
+    if (response is List) {
+      return response.map((review) {
+        return {
+          'rating': review['fields']['rating'],
+          'comment': review['fields']['review']
+        };
+      }).toList();
+    }
+
+      return [];
+    } catch (e, stackTrace) {
+      print('Error in fetchReviews: $e');
+      print('Stack trace: $stackTrace');
       return [];
     }
   }
@@ -39,14 +62,13 @@ class _CommentPageState extends State<CommentPage> {
     if (_formKey.currentState!.validate() && _rating > 0) {
       final request = context.read<CookieRequest>();
       try {
-        // Adjust the URL to match your Django endpoint
-        final response = await request.post(
-          'http://127.0.0.1:8000/review/create-comment/',
-          {
-            'shop_id': widget.shopId.toString(),
+        final response = await request.postJson(
+          'http://127.0.0.1:8000/review/review/create/',
+          jsonEncode(<String, String> {
+            'product_id': widget.productId,
             'rating': _rating.toString(),
-            'comment': _commentController.text,
-          },
+            'review': _commentController.text,
+          }),
         );
 
         if (response['status'] == 'success' && context.mounted) {
@@ -59,9 +81,20 @@ class _CommentPageState extends State<CommentPage> {
               backgroundColor: AppColors.coklat2,
             ),
           );
+
+          await fetchReviews();
+
+          _commentController.clear();
+          setState(() {
+            _rating = 0;
+          });
+
           Navigator.pop(context);
+        } else {
+          print('Failed to submit review: ${response['message']}');
         }
       } catch (e) {
+        print('Error submitting review: $e');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -94,7 +127,7 @@ class _CommentPageState extends State<CommentPage> {
               // Existing Reviews
               SliverToBoxAdapter(
                 child: FutureBuilder<List<dynamic>>(
-                  future: fetchComments(),
+                  future: fetchReviews(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
