@@ -1,6 +1,6 @@
 // lib/widgets/custom_text_field.dart
 import 'package:flutter/material.dart';
-import 'package:batikin_mobile/constant/colors.dart';
+import 'package:batikin_mobile/constants/colors.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
