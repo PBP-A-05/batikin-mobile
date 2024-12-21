@@ -143,7 +143,6 @@ class _DisplayCartState extends State<DisplayCart> {
 
   Future<void> handleSort(String sortBy) async {
     setState(() {
-      isLoading = true;
       _selectedSort = sortBy;
     });
 
@@ -152,12 +151,8 @@ class _DisplayCartState extends State<DisplayCart> {
       final cart = await CartService(request).sortCart(sortBy);
       setState(() {
         cartData = cart;
-        isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
       if (!context.mounted) return;
       showToast(
         context,
@@ -296,198 +291,189 @@ class _DisplayCartState extends State<DisplayCart> {
                   ),
                 ),
                 Expanded(
-                  child: cartData == null || cartData!.data.cartItems.isEmpty
-                      ? const Center(child: Text('Belum ada item di keranjang!'))
-                      : cartData!.data.cartItems.where((item) {
-                          if (_selectedSort == 'men') {
-                            return item.category == 'pakaian_pria';
-                          } else if (_selectedSort == 'women') {
-                            return item.category == 'pakaian_wanita';
-                          } else if (_selectedSort == 'accessories') {
-                            return item.category == 'aksesoris';
-                          }
-                          return true;
-                        }).isEmpty
-                          ? const Center(
-                              child: Text('Tidak ada item dalam kategori ini'),
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: cartData!.data.cartItems.length,
-                              itemBuilder: (context, index) {
-                                final item = cartData!.data.cartItems[index];
-                                selectedItems.putIfAbsent(item.id, () => false);
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: cartData == null || cartData!.data.cartItems.isEmpty
+                        ? const Center(child: Text('Belum ada item di keranjang!'))
+                        : ListView.builder(
+                            key: ValueKey<String>(_selectedSort), // Add key for animation
+                            padding: const EdgeInsets.all(16),
+                            itemCount: cartData!.data.cartItems.length,
+                            itemBuilder: (context, index) {
+                              final item = cartData!.data.cartItems[index];
+                              selectedItems.putIfAbsent(item.id, () => false);
 
-                                return Dismissible(
-                                  key: Key(item.id.toString()),
-                                  direction: DismissDirection.endToStart,
-                                  onDismissed: (direction) {
-                                    handleRemoveItem(item.id);
-                                  },
-                                  background: Container(
-                                    color: Colors.red,
-                                    alignment: Alignment.centerRight,
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 20),
-                                    child:
-                                        const Icon(Icons.delete, color: Colors.white),
-                                  ),
-                                  child: Card(
-                                    margin: const EdgeInsets.only(bottom: 16),
-                                    elevation: 2,
-                                    color: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: BorderSide(
-                                        color: AppColors.coklat1.withOpacity(0.25),
-                                        width: 1,
-                                      ),
+                              return Dismissible(
+                                key: Key(item.id.toString()),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (direction) {
+                                  handleRemoveItem(item.id);
+                                },
+                                background: Container(
+                                  color: Colors.red,
+                                  alignment: Alignment.centerRight,
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 20),
+                                  child:
+                                      const Icon(Icons.delete, color: Colors.white),
+                                ),
+                                child: Card(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  elevation: 2,
+                                  color: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: BorderSide(
+                                      color: AppColors.coklat1.withOpacity(0.25),
+                                      width: 1,
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Checkbox(
-                                            value: selectedItems[item.id] ?? false,
-                                            onChanged: (bool? value) {
-                                              setState(() {
-                                                selectedItems[item.id] =
-                                                    value ?? false;
-                                                updateTotalPrice(
-                                                    cartData!.data.cartItems);
-                                              });
-                                            },
-                                            activeColor: AppColors.coklat2,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Checkbox(
+                                          value: selectedItems[item.id] ?? false,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              selectedItems[item.id] =
+                                                  value ?? false;
+                                              updateTotalPrice(
+                                                  cartData!.data.cartItems);
+                                            });
+                                          },
+                                          activeColor: AppColors.coklat2,
+                                        ),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(
+                                            item.imageUrls[0],
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
                                           ),
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
-                                            child: Image.network(
-                                              item.imageUrls[0],
-                                              width: 80,
-                                              height: 80,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  item.productName,
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item.productName,
+                                                style: GoogleFonts.poppins(
+                                                  color: AppColors.coklat3,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: AppColors.coklat1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                                child: Text(
+                                                  _getCategoryDisplayName(
+                                                      item.category),
                                                   style: GoogleFonts.poppins(
-                                                    color: AppColors.coklat3,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 14,
+                                                    fontSize: 10,
+                                                    color: AppColors.coklat2,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 4),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: AppColors.coklat1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(20),
-                                                  ),
-                                                  child: Text(
-                                                    _getCategoryDisplayName(
-                                                        item.category),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Rp${_formatNumber(item.price)}',
                                                     style: GoogleFonts.poppins(
-                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
                                                       color: AppColors.coklat2,
+                                                      fontSize: 16,
                                                     ),
                                                   ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      'Rp${_formatNumber(item.price)}',
-                                                      style: GoogleFonts.poppins(
-                                                        fontWeight: FontWeight.bold,
+                                                  Row(
+                                                    children: [
+                                                      IconButton(
+                                                        icon: const Icon(
+                                                            Icons.delete_outline),
+                                                        onPressed: () =>
+                                                            handleRemoveItem(
+                                                                item.id),
                                                         color: AppColors.coklat2,
-                                                        fontSize: 16,
                                                       ),
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        IconButton(
-                                                          icon: const Icon(
-                                                              Icons.delete_outline),
-                                                          onPressed: () =>
-                                                              handleRemoveItem(
-                                                                  item.id),
-                                                          color: AppColors.coklat2,
+                                                      Container(
+                                                        decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                              color: AppColors
+                                                                  .coklat1
+                                                                  .withOpacity(
+                                                                      0.25)),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  4),
                                                         ),
-                                                        Container(
-                                                          decoration: BoxDecoration(
-                                                            border: Border.all(
+                                                        child: Row(
+                                                          children: [
+                                                            IconButton(
+                                                              icon: const Icon(
+                                                                  Icons.remove),
+                                                              onPressed: item
+                                                                          .quantity >
+                                                                      1
+                                                                  ? () =>
+                                                                      handleQuantityChange(
+                                                                          item,
+                                                                          false)
+                                                                  : null,
+                                                              color:
+                                                                  AppColors.coklat2,
+                                                            ),
+                                                            Text(
+                                                              '${item.quantity}',
+                                                              style: GoogleFonts
+                                                                  .poppins(
                                                                 color: AppColors
-                                                                    .coklat1
-                                                                    .withOpacity(
-                                                                        0.25)),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                    4),
-                                                          ),
-                                                          child: Row(
-                                                            children: [
-                                                              IconButton(
-                                                                icon: const Icon(
-                                                                    Icons.remove),
-                                                                onPressed: item
-                                                                            .quantity >
-                                                                        1
-                                                                    ? () =>
-                                                                        handleQuantityChange(
-                                                                            item,
-                                                                            false)
-                                                                    : null,
-                                                                color:
-                                                                    AppColors.coklat2,
+                                                                    .coklat2,
                                                               ),
-                                                              Text(
-                                                                '${item.quantity}',
-                                                                style: GoogleFonts
-                                                                    .poppins(
-                                                                  color: AppColors
-                                                                      .coklat2,
-                                                                ),
-                                                              ),
-                                                              IconButton(
-                                                                icon: const Icon(
-                                                                    Icons.add),
-                                                                onPressed: () =>
-                                                                    handleQuantityChange(
-                                                                        item, true),
-                                                                color:
-                                                                    AppColors.coklat2,
-                                                              ),
-                                                            ],
-                                                          ),
+                                                            ),
+                                                            IconButton(
+                                                              icon: const Icon(
+                                                                  Icons.add),
+                                                              onPressed: () =>
+                                                                  handleQuantityChange(
+                                                                      item, true),
+                                                              color:
+                                                                  AppColors.coklat2,
+                                                            ),
+                                                          ],
                                                         ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
                 ),
               ],
             ),
