@@ -27,10 +27,14 @@ class _DisplayProductState extends State<DisplayProduct>
   bool isLoading = true;
   late String selectedCategory;
   final ProductService _productService = ProductService();
+  late String username;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    });
     selectedCategory = widget.initialCategory;
     fetchProducts();
 
@@ -373,8 +377,7 @@ class _DisplayProductState extends State<DisplayProduct>
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
-          
+          print("Using stored username: $username"); // Debug
           if (username.isEmpty || username == 'test') {
             _showLoginRequiredSnackBar('detail produk');
             return;
@@ -386,6 +389,7 @@ class _DisplayProductState extends State<DisplayProduct>
               builder: (context) => DisplayProductDetail(
                 productId: product.pk,
               ),
+              settings: RouteSettings(arguments: username), // Use stored username
             ),
           );
         },

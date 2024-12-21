@@ -57,6 +57,8 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),

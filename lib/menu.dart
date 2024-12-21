@@ -424,6 +424,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => DisplayProduct(initialCategory: 'pakaian_wanita'),
+                                              settings: RouteSettings(arguments: widget.username),  
                                             ),
                                           );
                                         },
@@ -660,7 +661,7 @@ class _MyHomePageState extends State<MyHomePage> {
           context,
           MaterialPageRoute(
             builder: (context) => DisplayProduct(initialCategory: category),
-            settings: RouteSettings(arguments: widget.username),
+            settings: RouteSettings(arguments: widget.username), 
           ),
         );
       },
@@ -686,6 +687,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => DisplayProduct(initialCategory: category),
+                  settings: RouteSettings(arguments: widget.username),  
                 ),
               );
             },
@@ -740,7 +742,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context,
       MaterialPageRoute(
         builder: (context) => DisplayProduct(initialCategory: category),
-        settings: RouteSettings(arguments: widget.username),
+        settings: RouteSettings(arguments: widget.username), 
       ),
     );
   }
