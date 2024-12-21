@@ -9,6 +9,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:batikin_mobile/services/product_service.dart';
+import 'package:batikin_mobile/utils/toast_util.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -57,6 +58,8 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -265,10 +268,19 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
               IconButton(
                 icon: Icon(Icons.shopping_cart, color: AppColors.coklat1),
                 onPressed: () {
+                  final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    
+                  if (username.isEmpty || username == 'test') {
+                    showToast(
+                      context,
+                      'Masuk ke Batikin untuk melihat keranjang!',
+                      type: ToastType.alert,
+                    );
+                    return;
+                  }
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const DisplayCart()),
+                    MaterialPageRoute(builder: (context) => const DisplayCart()),
                   );
                 },
               ),
@@ -483,74 +495,93 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
     final totalPrice = price * quantity;
     final formattedPrice = 'Rp${_formatNumber(totalPrice)}';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: AppColors.bgGradientCoklat,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            formattedPrice,
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutBack,
+              reverseCurve: Curves.easeInBack,
             ),
           ),
-          TextButton(
-            onPressed: () async {
-              final request =
-                  Provider.of<CookieRequest>(context, listen: false);
-              final cartService = CartService(request);
-
-              try {
-                final response = await cartService.addToCart(
-                  product!.pk,
-                  quantity,
-                );
-
-                if (response.status == "success") {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          "$quantity produk berhasil dimasukkan ke keranjang!"),
-                      backgroundColor: AppColors.coklat2,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Gagal menambahkan ke keranjang"),
-                    backgroundColor: Colors.red,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            child: Text(
-              'Tambahkan ke Keranjang',
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        key: ValueKey<int>(quantity),  
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: AppColors.bgGradientCoklat,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              formattedPrice,
               style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-          ),
-        ],
+            TextButton(
+              onPressed: () async {
+                final request = Provider.of<CookieRequest>(context, listen: false);
+                final cartService = CartService(request);
+
+                try {
+                  final response = await cartService.addToCart(
+                    product!.pk,
+                    quantity,
+                  );
+
+                  if (response.status == "success") {
+                    if (!context.mounted) return;
+                    setState(() {
+                      quantity = 1; 
+                    });
+                    showToast(
+                      context,
+                      "$quantity produk berhasil dimasukkan ke keranjang!",
+                      type: ToastType.success,
+                    );
+                  }
+                } catch (e) {
+                  if (!context.mounted) return;
+                  showToast(
+                    context,
+                    "Gagal menambahkan ke keranjang",
+                    type: ToastType.alert,
+                  );
+                }
+              },
+              child: Text(
+                'Tambahkan ke Keranjang',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -674,14 +705,10 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri)) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Tidak dapat membuka halaman toko',
-            style: GoogleFonts.poppins(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        'Tidak dapat membuka halaman toko',
+        type: ToastType.alert,
       );
     }
   }

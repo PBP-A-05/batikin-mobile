@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
 import 'package:batikin_mobile/screens/cart/display_cart.dart'; 
 import 'package:batikin_mobile/services/product_service.dart';
+import 'package:batikin_mobile/utils/toast_util.dart';
 
 class DisplayProduct extends StatefulWidget {
   final String initialCategory;
@@ -27,10 +28,14 @@ class _DisplayProductState extends State<DisplayProduct>
   bool isLoading = true;
   late String selectedCategory;
   final ProductService _productService = ProductService();
+  late String username;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    });
     selectedCategory = widget.initialCategory;
     fetchProducts();
 
@@ -73,17 +78,11 @@ class _DisplayProductState extends State<DisplayProduct>
         .toList();
   }
 
-  void _showLoginRequiredSnackBar(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Masuk ke Batikin untuk melihat $feature!',
-          style: GoogleFonts.poppins(color: Colors.white),
-        ),
-        backgroundColor: AppColors.coklat2,
-        behavior: SnackBarBehavior.fixed,
-        duration: const Duration(milliseconds: 3500),
-      ),
+  void _showLoginRequiredToast(String feature) {
+    showToast(
+      context,
+      'Masuk ke Batikin untuk melihat $feature!',
+      type: ToastType.alert,
     );
   }
 
@@ -209,46 +208,25 @@ class _DisplayProductState extends State<DisplayProduct>
                 child: Container(
                   height: kToolbarHeight,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back, color: AppColors.coklat1),
-                        onPressed: () => Navigator.pop(context),
+                      // Back Arrow
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back, color: AppColors.coklat1),
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: Icon(Icons.favorite_border, color: AppColors.coklat1),
-                        onPressed: () {/* Implement wishlist */},
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.shopping_cart, color: AppColors.coklat1),
-                        onPressed: () {
-                          final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
-                          
-                          if (username.isEmpty || username == 'test') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Masuk ke Batikin untuk melihat keranjang!',
-                                  style: GoogleFonts.poppins(color: Colors.white),
-                                ),
-                                backgroundColor: AppColors.coklat2,
-                                behavior: SnackBarBehavior.fixed,
-                                duration: const Duration(milliseconds: 3500),
-                              ),
-                            );
-                            return;
-                          }
-                          
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const DisplayCart()),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.person, color: AppColors.coklat1),
-                        onPressed: () {/* Implement profile */},
+                      // Center Title
+                      Text(
+                        'Batikin',
+                        style: TextStyle(
+                          fontFamily: AppFonts.javaneseText,
+                          fontSize: 24,
+                          color: AppColors.coklat1,
+                        ),
                       ),
                     ],
                   ),
@@ -259,73 +237,65 @@ class _DisplayProductState extends State<DisplayProduct>
         ],
       ),
 
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30.0),
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              if (username.isEmpty || username == 'test') {
+                if (index == 2) {
+                  _showLoginRequiredToast('keranjang');
+                  return;
+                }
+              }
+              
+              if (index == 2) {
+                Navigator.pushNamed(context, '/cart');
+              } else if (index == 3) {
+                Navigator.pushNamed(context, '/profile');
+              } else {
+                setState(() {
+                  _currentIndex = index;
+                });
+              }
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedItemColor: AppColors.coklat3,
+            unselectedItemColor: AppColors.coklat1Rgba,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite_border),
+                label: 'Wishlist',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_cart),
+                label: 'Cart',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
               ),
             ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                canvasColor: Colors.transparent,
-              ),
-              child: BottomNavigationBar(
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DisplayCart()),
-                    );
-                  } else {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  }
-                },
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                elevation: 0,
-                selectedItemColor: AppColors.coklat3,
-                unselectedItemColor: AppColors.coklat1Rgba,
-                selectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-                unselectedLabelStyle: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.favorite_border),
-                    label: 'Wishlist',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_cart),
-                    label: 'Cart',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.person),
-                    label: 'Profile',
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ),
@@ -373,10 +343,8 @@ class _DisplayProductState extends State<DisplayProduct>
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
-          
           if (username.isEmpty || username == 'test') {
-            _showLoginRequiredSnackBar('detail produk');
+            _showLoginRequiredToast('detail produk');
             return;
           }
           
@@ -386,6 +354,7 @@ class _DisplayProductState extends State<DisplayProduct>
               builder: (context) => DisplayProductDetail(
                 productId: product.pk,
               ),
+              settings: RouteSettings(arguments: username), // Use stored username
             ),
           );
         },

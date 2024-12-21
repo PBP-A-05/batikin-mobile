@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:batikin_mobile/models/product.dart';
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
 import 'package:batikin_mobile/config/config.dart';
+import 'package:batikin_mobile/utils/toast_util.dart';
 
 class MyHomePage extends StatefulWidget {
   final String username;
@@ -85,17 +86,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _showLoginRequiredSnackBar(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Masuk ke Batikin untuk melihat $feature!',
-          style: GoogleFonts.poppins(color: Colors.white),
-        ),
-        backgroundColor: AppColors.coklat2,
-        behavior: SnackBarBehavior.fixed,
-        duration: const Duration(milliseconds: 3500),
-      ),
+  void _showLoginRequiredToast(String feature) {
+    showToast(
+      context,
+      'Masuk ke Batikin untuk melihat $feature!',
+      type: ToastType.alert,
     );
   }
 
@@ -179,26 +174,46 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ],
                               ),
                             ] else ...[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.baseline, 
-                                textBaseline: TextBaseline.alphabetic, 
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Selamat datang, ',
-                                    style: TextStyle(
-                                      fontFamily: AppFonts.javaneseText,
-                                      fontSize: 22, 
-                                      color: Colors.white,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        'Siap menjelajahi',
+                                        style: TextStyle(
+                                          fontFamily: AppFonts.javaneseText,
+                                          fontSize: 22,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    '${widget.username}.',
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 22, 
-                                      color: Colors.white,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        'Yogyakarta, ',
+                                        style: TextStyle(
+                                          fontFamily: AppFonts.javaneseText,
+                                          fontSize: 22,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${widget.username}?',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 22,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -417,13 +432,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: InkWell(
                                         onTap: () {
                                           if (widget.username.isEmpty || widget.username == 'test') {
-                                            _showLoginRequiredSnackBar('koleksi produk');
+                                            _showLoginRequiredToast('koleksi produk');
                                             return;
                                           }
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => DisplayProduct(initialCategory: 'pakaian_wanita'),
+                                              settings: RouteSettings(arguments: widget.username),  
                                             ),
                                           );
                                         },
@@ -460,7 +476,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: InkWell(
                                 onTap: () {
                                   if (widget.username.isEmpty || widget.username == 'test') {
-                                    _showLoginRequiredSnackBar('detail produk');
+                                    _showLoginRequiredToast('detail produk');
                                     return;
                                   }
                                   Navigator.push(
@@ -570,16 +586,30 @@ class _MyHomePageState extends State<MyHomePage> {
             left: 0,
             right: 0,
             child: Container(
-              height: MediaQuery.of(context).padding.top + 56,
-              color: Colors.white,
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top), 
-              child: Center( 
-                child: Text(
-                  'Batikin',
-                  style: TextStyle(
-                    fontFamily: AppFonts.javaneseText,
-                    fontSize: 24,
-                    color: AppColors.coklat1,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.coklat1.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Container(
+                  height: kToolbarHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Center(
+                    child: Text(
+                      'Batikin',
+                      style: TextStyle(
+                        fontFamily: AppFonts.javaneseText,
+                        fontSize: 24,
+                        color: AppColors.coklat1,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -608,7 +638,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onTap: (index) {
               if (widget.username.isEmpty || widget.username == 'test') {
                 if (index == 2) { 
-                  _showLoginRequiredSnackBar('keranjang');
+                  _showLoginRequiredToast('keranjang');
                   return;
                 }
               }
@@ -660,7 +690,7 @@ class _MyHomePageState extends State<MyHomePage> {
           context,
           MaterialPageRoute(
             builder: (context) => DisplayProduct(initialCategory: category),
-            settings: RouteSettings(arguments: widget.username),
+            settings: RouteSettings(arguments: widget.username), 
           ),
         );
       },
@@ -686,6 +716,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => DisplayProduct(initialCategory: category),
+                  settings: RouteSettings(arguments: widget.username),  
                 ),
               );
             },
@@ -740,7 +771,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context,
       MaterialPageRoute(
         builder: (context) => DisplayProduct(initialCategory: category),
-        settings: RouteSettings(arguments: widget.username),
+        settings: RouteSettings(arguments: widget.username), 
       ),
     );
   }

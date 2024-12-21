@@ -1,4 +1,3 @@
-// lib/widgets/checkout_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/constants/colors.dart';
 import 'package:batikin_mobile/models/view_cart.dart';
@@ -7,6 +6,7 @@ import 'package:batikin_mobile/models/address.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:batikin_mobile/utils/toast_util.dart';
 
 class CheckoutDialog extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -42,6 +42,12 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
         isLoading = false;
       });
     } catch (e) {
+      if (!context.mounted) return;
+      showToast(
+        context,
+        'Gagal memuat alamat: $e',
+        type: ToastType.alert,
+      );
       setState(() {
         isLoading = false;
       });
@@ -64,25 +70,18 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       if (!context.mounted) return;
       if (response.status == 'success') {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Pesanan berhasil dibuat!',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            backgroundColor: AppColors.coklat2,
-            behavior: SnackBarBehavior.fixed,
-            duration: const Duration(milliseconds: 3500), 
-          ),
+        showToast(
+          context,
+          'Pesanan berhasil dibuat!',
+          type: ToastType.success,
         );
       }
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error creating order: $e'),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        'Error creating order: $e',
+        type: ToastType.alert,
       );
     }
   }
@@ -225,22 +224,61 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
                   const Center(child: CircularProgressIndicator())
                 else if (addresses.isEmpty)
                   Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Anda belum memiliki alamat.',
-                        style: GoogleFonts.poppins(),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: AppColors.coklat3,
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/profile');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.coklat2,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, '/profile');
+                          },
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: AppColors.bgGradientCoklat,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Tambah alamat',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        child: const Text('Tambah Alamat'),
                       ),
                     ],
                   )
