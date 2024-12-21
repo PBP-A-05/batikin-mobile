@@ -6,8 +6,10 @@ import 'package:batikin_mobile/constants/colors.dart';
 
 class OrderDetailPage extends StatelessWidget {
   final Order order;
+  final int count;
 
-  const OrderDetailPage({Key? key, required this.order}) : super(key: key);
+  const OrderDetailPage({Key? key, required this.order, required this.count})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

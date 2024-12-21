@@ -24,4 +24,20 @@ class AlamatService {
       return false;
     }
   }
+
+  static Future<bool> addAddress(CookieRequest request, Address address) async {
+    final response = await request.post(
+      '${Config.baseUrl}/account/add_address_flutter/',
+      {
+        'title': address.title,
+        'address': address.address,
+      },
+    );
+    print("Response: $response");
+    if (response['status'] == 'success') {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

@@ -25,7 +25,7 @@ class CustomToast extends StatelessWidget {
       case ToastType.alert:
         borderGradient = AppColors.gradientCoklat;
         textColor = Colors.red;
-        backgroundColor = Colors.red.withOpacity(0.1);
+        backgroundColor = Colors.white;
         break;
       case ToastType.info:
       default:

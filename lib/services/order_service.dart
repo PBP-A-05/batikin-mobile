@@ -10,13 +10,32 @@ class OrderService {
   OrderService(this.request);
 
   Future<List<Order>> fetchOrderHistory() async {
-    final response = await request.get("${Config.baseUrl}/cart/api/get-order/");
-
-    if (response != null) {
-      final List<dynamic> orderList = response['orders'];
-      return orderList.map((json) => Order.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to fetch orders');
+    try {
+      final response =
+          await request.get("${Config.baseUrl}/cart/api/get-order/");
+      if (response != null && response['orders'] != null) {
+        // Ensure 'orders' is a List
+        if (response['orders'] is List) {
+          final List<dynamic> orderList = response['orders'];
+          return orderList.map((json) {
+            if (json is Map<String, dynamic>) {
+              return Order.fromJson(json);
+            } else {
+              throw Exception('Invalid order data format');
+            }
+          }).toList();
+        } else {
+          throw Exception("'orders' is not a List in the response");
+        }
+      } else if (response != null && response['error'] != null) {
+        // Handle specific error messages from backend
+        throw Exception('Error: ${response['error']}');
+      } else {
+        throw Exception('Unexpected response structure');
+      }
+    } catch (e) {
+      print('Error in fetchOrderHistory: $e');
+      throw Exception('Failed to fetch orders: $e');
     }
   }
 }

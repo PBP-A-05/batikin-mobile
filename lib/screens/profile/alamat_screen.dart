@@ -1,8 +1,10 @@
 // lib/screens/profile/alamat_screen.dart
+import 'package:batikin_mobile/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/models/profile_model.dart';
 import 'package:batikin_mobile/services/alamat_service.dart';
 import 'package:batikin_mobile/screens/profile/edit_alamat_page.dart';
+import 'package:batikin_mobile/screens/profile/add_alamat_page.dart';
 import 'package:batikin_mobile/utils/toast_util.dart';
 import 'package:provider/provider.dart';
 import 'package:batikin_mobile/services/auth_service.dart';
@@ -53,6 +55,7 @@ class _AlamatPageState extends State<AlamatPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Removed canAddMore condition to always show the FAB
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alamat Saya'),
@@ -79,7 +82,8 @@ class _AlamatPageState extends State<AlamatPage> {
                         title: Text(address.title),
                         subtitle: Text(address.address),
                         trailing: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          icon:
+                              const Icon(Icons.edit, color: AppColors.coklat2),
                           onPressed: () async {
                             bool? result = await Navigator.push(
                               context,
@@ -102,19 +106,30 @@ class _AlamatPageState extends State<AlamatPage> {
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Navigate to Add Alamat Page if you have one
-          // Example:
-          // bool? result = await Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (context) => AddAlamatPage()),
-          // );
-          // if (result == true) {
-          //   await _fetchAddresses();
-          //   showToast(context, 'Alamat berhasil ditambahkan.', type: ToastType.success);
-          // }
+          if (addresses.length >= 3) {
+            showToast(context, 'Maksimal 3 alamat sudah tercapai.',
+                type: ToastType.alert);
+            return;
+          }
+
+          bool? result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddAlamatPage(),
+            ),
+          );
+
+          if (result == true) {
+            await _fetchAddresses();
+            showToast(context, 'Alamat berhasil ditambahkan.',
+                type: ToastType.success);
+          }
         },
-        child: const Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white, // Set the icon color to white
+        ),
+        backgroundColor: AppColors.coklat2,
       ),
     );
   }

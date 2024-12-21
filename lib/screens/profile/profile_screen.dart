@@ -2,6 +2,7 @@
 import 'package:batikin_mobile/screens/profile/edit_profile_screen.dart';
 import 'package:batikin_mobile/screens/profile/history_booking_page.dart';
 import 'package:batikin_mobile/screens/profile/pemesanan_screen.dart';
+import 'package:batikin_mobile/widgets/custom_gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/constants/colors.dart';
 import 'package:batikin_mobile/widgets/custom_button.dart';
@@ -42,8 +43,10 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text(
           'Account',
-          style:
-              TextStyle(color: AppColors.coklat2, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppColors.coklat2,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.coklat2,
@@ -59,42 +62,36 @@ class _ProfilePageState extends State<ProfilePage> {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data == null) {
-                    return Center(child: Text('No data found.'));
+                    return const Center(child: Text('No data found.'));
                   } else {
                     final profile = snapshot.data!;
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment
-                              .start, // Align items at the top
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Profile Picture
-                            CircleAvatar(
+                            const CircleAvatar(
                               radius: 50,
                               backgroundImage: NetworkImage(
                                 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOizmxkQV5rf4N9ayOC3pojndp0nzIDAFUtg&s',
                               ),
                             ),
-                            const SizedBox(
-                                width:
-                                    20), // Use width instead of height in Row
+                            const SizedBox(width: 20),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start, // Left align text
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Halo, ${profile.firstName} ${profile.lastName}',
                                     style: const TextStyle(
                                       fontSize: 16,
-                                      color: Colors
-                                          .brown, // Replace AppColors.coklat2 if needed
+                                      color: Colors.brown,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  // Username
                                   Text(
                                     'Username: ${profile.username}',
                                     style: const TextStyle(
@@ -103,7 +100,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  // Phone Number
                                   Text(
                                     'Phone: ${profile.phoneNumber}',
                                     style: const TextStyle(
@@ -116,6 +112,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.edit),
+                              color: AppColors.coklat2,
                               tooltip: 'Edit Profile',
                               onPressed: () async {
                                 // Navigate to EditProfilePage and await the result
@@ -126,7 +123,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                         EditProfilePage(profile: profile),
                                   ),
                                 );
-
                                 if (result == true) {
                                   // If update was successful, refetch profile data
                                   setState(() {
@@ -151,19 +147,26 @@ class _ProfilePageState extends State<ProfilePage> {
                           onPressed: () async {
                             final success = await authService.logout();
                             if (success) {
-                              showToast(context, 'Successfully logged out!',
-                                  type: ToastType.success,
-                                  gravity: ToastGravity.BOTTOM_RIGHT);
+                              showToast(
+                                context,
+                                'Successfully logged out!',
+                                type: ToastType.success,
+                                gravity: ToastGravity.BOTTOM_RIGHT,
+                              );
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const LoginPage()),
+                                  builder: (context) => const LoginPage(),
+                                ),
                                 (route) => false,
                               );
                             } else {
-                              showToast(context, 'Logout failed!',
-                                  type: ToastType.alert,
-                                  gravity: ToastGravity.BOTTOM_RIGHT);
+                              showToast(
+                                context,
+                                'Logout failed!',
+                                type: ToastType.alert,
+                                gravity: ToastGravity.BOTTOM_RIGHT,
+                              );
                             }
                           },
                           width: double.infinity,
@@ -171,14 +174,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           backgroundColor: Colors.red,
                         ),
                         const SizedBox(height: 20),
-                        Divider(color: Colors.grey),
+                        const Divider(color: Colors.grey),
                         const SizedBox(height: 20),
                         // History Pembelian
                         ListTile(
                           leading: const Icon(Icons.history),
                           title: const Text('History Pembelian'),
                           onTap: () {
-                            // Navigate to History Pembelian
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -210,7 +212,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => AlamatPage(
-                                    initialAddresses: profile.addresses),
+                                  initialAddresses: profile.addresses,
+                                ),
                               ),
                             );
                           },
@@ -222,41 +225,74 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               )
             : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'This is the Profile Page',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: AppColors.coklat2,
-                    ),
+                  // Row with Login and Register
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton(
+                          text: 'Login',
+                          backgroundColor: AppColors.coklat1,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CustomGradientButton(
+                          text: 'Register',
+                          backgroundColor: const Color(
+                              0xFFF6F6F6), // Background color F6F6F6
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterPage(),
+                              ),
+                            );
+                          },
+                          width: double.infinity,
+                          height: 50.0,
+                          textColor: AppColors.coklat1, // Text color 754B0B
+                          borderGradient:
+                              AppColors.gradientCoklat, // Gradient border
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
-                  CustomButton(
-                    text: 'Login',
-                    onPressed: () {
-                      Navigator.push(
+                  // Purchase History (shows a toast when tapped)
+                  ListTile(
+                    leading: const Icon(Icons.history),
+                    title: const Text('History Pembelian'),
+                    onTap: () {
+                      showToast(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()),
+                        'Please login to view your purchase history.',
+                        type: ToastType.alert,
+                        gravity: ToastGravity.BOTTOM_RIGHT,
                       );
                     },
-                    width: double.infinity,
-                    height: 50.0,
                   ),
-                  const SizedBox(height: 10),
-                  CustomButton(
-                    text: 'Register',
-                    onPressed: () {
-                      Navigator.push(
+                  // Booking History (shows a toast when tapped)
+                  ListTile(
+                    leading: const Icon(Icons.book_online),
+                    title: const Text('History Booking'),
+                    onTap: () {
+                      showToast(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const RegisterPage()),
+                        'Please login to view your booking history.',
+                        type: ToastType.alert,
+                        gravity: ToastGravity.BOTTOM_RIGHT,
                       );
                     },
-                    width: double.infinity,
-                    height: 50.0,
-                    backgroundColor: Colors.grey,
                   ),
                 ],
               ),

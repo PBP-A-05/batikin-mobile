@@ -1,4 +1,3 @@
-// lib/screens/profile/history_pemesanan_page.dart
 import 'package:batikin_mobile/screens/profile/order_detail_page.dart';
 import 'package:batikin_mobile/utils/utils_function.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,14 @@ import 'package:provider/provider.dart';
 import 'package:batikin_mobile/widgets/custom_button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+// Define sorting options
+enum SortOption {
+  dateAsc,
+  dateDesc,
+  priceAsc,
+  priceDesc,
+}
+
 class HistoryPemesananPage extends StatefulWidget {
   const HistoryPemesananPage({super.key});
 
@@ -21,6 +28,7 @@ class HistoryPemesananPage extends StatefulWidget {
 
 class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
   late Future<List<Order>> _orderFuture;
+  SortOption _currentSortOption = SortOption.dateDesc; // Default sort option
 
   @override
   void initState() {
@@ -28,6 +36,25 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
     final request = context.read<CookieRequest>();
     final orderService = OrderService(request);
     _orderFuture = orderService.fetchOrderHistory();
+    // Removed the local _count variable
+  }
+
+  // Method to sort orders based on the selected sort option
+  void _sortOrders(List<Order> orders) {
+    switch (_currentSortOption) {
+      case SortOption.dateAsc:
+        orders.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case SortOption.dateDesc:
+        orders.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case SortOption.priceAsc:
+        orders.sort((a, b) => a.totalPrice.compareTo(b.totalPrice));
+        break;
+      case SortOption.priceDesc:
+        orders.sort((a, b) => b.totalPrice.compareTo(a.totalPrice));
+        break;
+    }
   }
 
   @override
@@ -43,6 +70,35 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
         ),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.coklat2,
+        actions: [
+          // Sorting Button
+          PopupMenuButton<SortOption>(
+            icon: const Icon(Icons.sort, color: AppColors.coklat2),
+            onSelected: (SortOption result) {
+              setState(() {
+                _currentSortOption = result;
+              });
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<SortOption>>[
+              const PopupMenuItem<SortOption>(
+                value: SortOption.dateAsc,
+                child: Text('Sort by Date Ascending'),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.dateDesc,
+                child: Text('Sort by Date Descending'),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.priceAsc,
+                child: Text('Sort by Price Ascending'),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.priceDesc,
+                child: Text('Sort by Price Descending'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: FutureBuilder<List<Order>>(
         future: _orderFuture,
@@ -60,15 +116,21 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                   style: TextStyle(color: AppColors.coklat2)),
             );
           } else {
-            final orders = snapshot.data!;
+            final orders = List<Order>.from(snapshot.data!);
+            _sortOrders(orders); // Sort the orders based on the selected option
 
             return ListView.builder(
               padding: const EdgeInsets.all(16.0),
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
-                final firstItem = order.items[0];
+                final firstItem =
+                    order.items.isNotEmpty ? order.items[0] : null;
                 final additionalItemsCount = order.items.length - 1;
+
+                if (firstItem == null) {
+                  return const SizedBox.shrink(); // Skip rendering if no items
+                }
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16.0),
@@ -90,12 +152,12 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Order Header: Date and Order ID
+                      // Order Header: Date and Sequential Order Number
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Order #${order.orderId}',
+                            'Order #${index + 1}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -164,8 +226,8 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      OrderDetailPage(order: order),
+                                  builder: (context) => OrderDetailPage(
+                                      order: order, count: index + 1),
                                 ),
                               );
                             },
@@ -183,7 +245,7 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
                               showToast(
                                 context,
                                 'Fitur belum tersedia',
-                                type: ToastType.success,
+                                type: ToastType.alert, // Changed to alert
                                 gravity: ToastGravity.BOTTOM_RIGHT,
                               );
                             },
@@ -216,12 +278,13 @@ class _HistoryPemesananPageState extends State<HistoryPemesananPage> {
     );
   }
 
-  void showOrderDetails(BuildContext context, Order order) {
+  // Updated showOrderDetails to accept sequential count if needed
+  void showOrderDetails(BuildContext context, Order order, int count) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Order #${order.orderId} Details'),
+          title: Text('Order #$count Details'),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,33 +1,23 @@
-import 'package:batikin_mobile/constants/colors.dart';
+// lib/screens/profile/add_alamat_page.dart
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/models/profile_model.dart';
 import 'package:batikin_mobile/services/alamat_service.dart';
 import 'package:provider/provider.dart';
 import 'package:batikin_mobile/utils/toast_util.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:batikin_mobile/widgets/custom_text_field.dart';
 
-class EditAlamatPage extends StatefulWidget {
-  final Address address;
-
-  const EditAlamatPage({super.key, required this.address});
+class AddAlamatPage extends StatefulWidget {
+  const AddAlamatPage({super.key});
 
   @override
-  _EditAlamatPageState createState() => _EditAlamatPageState();
+  _AddAlamatPageState createState() => _AddAlamatPageState();
 }
 
-class _EditAlamatPageState extends State<EditAlamatPage> {
+class _AddAlamatPageState extends State<AddAlamatPage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _addressController;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.address.title);
-    _addressController = TextEditingController(text: widget.address.address);
-  }
 
   @override
   void dispose() {
@@ -36,14 +26,14 @@ class _EditAlamatPageState extends State<EditAlamatPage> {
     super.dispose();
   }
 
-  void _updateAddress() async {
+  void _addAddress() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      Address updatedAddress = Address(
-        id: widget.address.id,
+      Address newAddress = Address(
+        id: 0, // ID will be set by the backend
         title: _titleController.text,
         address: _addressController.text,
       );
@@ -52,18 +42,18 @@ class _EditAlamatPageState extends State<EditAlamatPage> {
       CookieRequest request =
           Provider.of<CookieRequest>(context, listen: false);
 
-      bool success = await AlamatService.updateAddress(request, updatedAddress);
+      bool success = await AlamatService.addAddress(request, newAddress);
 
       setState(() {
         _isLoading = false;
       });
 
       if (success) {
-        showToast(context, 'Alamat berhasil diperbarui.',
+        showToast(context, 'Alamat berhasil ditambahkan.',
             type: ToastType.success);
         Navigator.pop(context, true);
       } else {
-        showToast(context, 'Gagal memperbarui alamat.', type: ToastType.alert);
+        showToast(context, 'Gagal menambahkan alamat.', type: ToastType.alert);
       }
     }
   }
@@ -72,7 +62,7 @@ class _EditAlamatPageState extends State<EditAlamatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Alamat'),
+        title: const Text('Tambah Alamat'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
@@ -84,10 +74,9 @@ class _EditAlamatPageState extends State<EditAlamatPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    CustomTextField(
+                    TextFormField(
                       controller: _titleController,
-                      labelText: 'Title',
-                      hintText: 'Masukkan judul',
+                      decoration: const InputDecoration(labelText: 'Title'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Silakan masukkan judul.';
@@ -95,11 +84,9 @@ class _EditAlamatPageState extends State<EditAlamatPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
+                    TextFormField(
                       controller: _addressController,
-                      labelText: 'Alamat',
-                      hintText: 'Masukkan alamat',
+                      decoration: const InputDecoration(labelText: 'Alamat'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Silakan masukkan alamat.';
@@ -109,16 +96,8 @@ class _EditAlamatPageState extends State<EditAlamatPage> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _updateAddress,
-                      child: const Text('Perbarui'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50), // Set height
-                        backgroundColor: AppColors.coklat2, // Background color
-                        foregroundColor: Colors.white, // Text color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                      ),
+                      onPressed: _addAddress,
+                      child: const Text('Tambah'),
                     ),
                   ],
                 ),

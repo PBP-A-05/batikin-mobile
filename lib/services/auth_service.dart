@@ -22,7 +22,7 @@ class AuthService {
   Future logout() async {
     final String url = "${Config.baseUrl}/auth/logout/";
     final response = await request.logout(url);
-    if (response.status == true) {
+    if (response['status'] == true) {
       return true;
     } else {
       return false;

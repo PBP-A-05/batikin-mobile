@@ -67,14 +67,14 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text(
           'Login',
           style: TextStyle(
-            color: AppColors.coklat3,
+            color: AppColors.coklat2,
             fontSize: 24.0,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.coklat3),
+        iconTheme: const IconThemeData(color: AppColors.coklat2),
       ),
       body: SingleChildScrollView(
         child: Padding(
