@@ -174,26 +174,46 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ],
                               ),
                             ] else ...[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.baseline, 
-                                textBaseline: TextBaseline.alphabetic, 
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Selamat datang, ',
-                                    style: TextStyle(
-                                      fontFamily: AppFonts.javaneseText,
-                                      fontSize: 22, 
-                                      color: Colors.white,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        'Siap menjelajahi',
+                                        style: TextStyle(
+                                          fontFamily: AppFonts.javaneseText,
+                                          fontSize: 22,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    '${widget.username}.',
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 22, 
-                                      color: Colors.white,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        'Yogyakarta, ',
+                                        style: TextStyle(
+                                          fontFamily: AppFonts.javaneseText,
+                                          fontSize: 22,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${widget.username}?',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 22,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

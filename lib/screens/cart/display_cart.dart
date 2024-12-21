@@ -536,6 +536,8 @@ class _DisplayCartState extends State<DisplayCart> {
                         child: InkWell(
                           onTap: showCheckoutDialog,
                           borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
+                          splashColor: Colors.white24,
+                          highlightColor: Colors.white10,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
