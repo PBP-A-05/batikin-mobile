@@ -3,10 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:batikin_mobile/models/product_detail.dart';
 import 'package:batikin_mobile/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; 
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:batikin_mobile/services/cart_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:batikin_mobile/services/product_service.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -25,6 +27,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   bool isLiked = false;
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
+  final ProductService _productService = ProductService();
 
   @override
   void initState() {
@@ -40,17 +43,11 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
 
   Future<void> fetchProductDetail() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/shopping/json/${widget.productId}/'),
-      );
-      if (response.statusCode == 200) {
-        final products = productDetailFromJson(response.body);
-        setState(() {
-          product = products
-              .first; // Mengambil item pertama karena API mengembalikan list
-          isLoading = false;
-        });
-      }
+      final productDetail = await _productService.fetchProductDetail(widget.productId);
+      setState(() {
+        product = productDetail;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -76,23 +73,20 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Main Content
           CustomScrollView(
             slivers: [
-              // Spacing for AppBar with increased gap
               const SliverToBoxAdapter(
                 child:
-                    SizedBox(height: kToolbarHeight + 32), // Increased spacing
+                    SizedBox(height: kToolbarHeight + 32), 
               ),
 
-              // Product Image with adjusted size
               SliverToBoxAdapter(
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
                       height: MediaQuery.of(context).size.width *
-                          0.8, // Reduced height
+                          0.8, 
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (index) {
@@ -104,7 +98,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                           const BouncingScrollPhysics(
                             decelerationRate: ScrollDecelerationRate.fast,
                           ),
-                        ), // Adjusted scroll physics
+                        ), 
                         itemCount: product!.fields.imageUrls.length,
                         itemBuilder: (context, index) {
                           return Container(
@@ -113,14 +107,13 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                               image: DecorationImage(
                                 image: NetworkImage(
                                     product!.fields.imageUrls[index]),
-                                fit: BoxFit.contain, // Changed to contain
+                                fit: BoxFit.contain, 
                               ),
                             ),
                           );
                         },
                       ),
                     ),
-                    // Dots Indicator
                     Positioned(
                       bottom: 16,
                       child: Row(
@@ -130,8 +123,8 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                             .entries
                             .map((entry) {
                           return Container(
-                            width: 6.0, // Smaller dots
-                            height: 6.0, // Smaller dots
+                            width: 6.0, 
+                            height: 6.0, 
                             margin: const EdgeInsets.symmetric(horizontal: 4.0),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -147,7 +140,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                 ),
               ),
 
-              // Product Details with adjusted spacing
               SliverToBoxAdapter(
                 child: Transform.translate(
                   offset: const Offset(0, -20),
@@ -162,14 +154,14 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(
-                            height: 32), // Increased spacing significantly
+                            height: 32), 
                         _buildCategoryLabel(product!.fields.category),
-                        const SizedBox(height: 12), // Increased spacing
+                        const SizedBox(height: 12), 
 
                         Text(
                           product!.fields.productName,
                           style: GoogleFonts.poppins(
-                            fontSize: 16, // Reduced font size
+                            fontSize: 16, 
                             fontWeight: FontWeight.w600,
                             color: AppColors.coklat1,
                           ),
@@ -181,7 +173,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                             Text(
                               product!.fields.price,
                               style: GoogleFonts.poppins(
-                                fontSize: 18, // Reduced font size
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.coklat2,
                               ),
@@ -202,7 +194,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Like and Quantity Controls
                         Row(
                           children: [
                             _buildLikeButton(),
@@ -214,15 +205,14 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Updated Description Section
-                        const SizedBox(height: 24), // Increased spacing
+                        const SizedBox(height: 24), 
                         const Divider(color: Color(0xFFDCD2C2)),
-                        const SizedBox(height: 16), // Added spacing
+                        const SizedBox(height: 16), 
                         _buildExpandableDescription(),
-                        const SizedBox(height: 16), // Added spacing
+                        const SizedBox(height: 16), 
                         const Divider(
-                            color: Color(0xFFDCD2C2)), // Added bottom divider
-                        const SizedBox(height: 32), // Added bottom spacing
+                            color: Color(0xFFDCD2C2)), 
+                        const SizedBox(height: 32), 
                       ],
                     ),
                   ),
@@ -231,10 +221,8 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             ],
           ),
 
-          // Fixed AppBar
           _buildAppBar(),
 
-          // Floating Action Button
           Positioned(
             bottom: 16,
             left: 16,
@@ -298,15 +286,15 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   Widget _buildCategoryLabel(String category) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: 10, vertical: 4), // Smaller padding
+          horizontal: 10, vertical: 4), 
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.coklat1),
-        borderRadius: BorderRadius.circular(16), // Smaller radius
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         _getCategoryDisplayName(category),
         style: GoogleFonts.poppins(
-          fontSize: 11, // Smaller font size
+          fontSize: 11, 
           color: AppColors.coklat3,
         ),
       ),
@@ -321,11 +309,17 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          if (label == 'Kunjungi Toko') {
+            _showVisitStoreDialog();
+          } else {
+            onTap();
+          }
+        },
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(
-              horizontal: 10, vertical: 4), // Smaller padding
+              horizontal: 10, vertical: 4), 
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFDCD2C2)),
             borderRadius: BorderRadius.circular(16),
@@ -335,12 +329,12 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             children: [
               Icon(icon,
                   size: 14,
-                  color: AppColors.coklat3.withOpacity(0.5)), // Smaller icon
+                  color: AppColors.coklat3.withOpacity(0.5)), 
               const SizedBox(width: 4),
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 11, // Smaller font size
+                  fontSize: 11, 
                   color: AppColors.coklat3.withOpacity(0.5),
                 ),
               ),
@@ -561,7 +555,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
     );
   }
 
-  // Helper method to format number with thousand separators
   String _formatNumber(double number) {
     final parts = number.toStringAsFixed(0).split('');
     final formattedParts = <String>[];
@@ -584,6 +577,112 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
         return 'Aksesoris';
       default:
         return category;
+    }
+  }
+
+  void _showVisitStoreDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Kunjungi Toko',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.coklat2,
+                  ),
+                ),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
+                  'Anda akan diarahkan ke halaman toko. Lanjutkan?',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: AppColors.coklat1,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Batal',
+                        style: GoogleFonts.poppins(
+                          color: AppColors.coklat1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _launchURL(product!.fields.storeUrl);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: AppColors.bgGradientCoklat,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16, 
+                            vertical: 8,   
+                          ),
+                          child: Text(
+                            'Ya, Lanjutkan',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,    
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Tidak dapat membuka halaman toko',
+            style: GoogleFonts.poppins(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

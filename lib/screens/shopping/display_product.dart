@@ -6,7 +6,8 @@ import 'package:batikin_mobile/constants/fonts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
-import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
+import 'package:batikin_mobile/screens/cart/display_cart.dart'; 
+import 'package:batikin_mobile/services/product_service.dart';
 
 class DisplayProduct extends StatefulWidget {
   final String initialCategory;
@@ -25,6 +26,7 @@ class _DisplayProductState extends State<DisplayProduct>
   List<Product> products = [];
   bool isLoading = true;
   late String selectedCategory;
+  final ProductService _productService = ProductService();
 
   @override
   void initState() {
@@ -53,15 +55,11 @@ class _DisplayProductState extends State<DisplayProduct>
 
   Future<void> fetchProducts() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/shopping/json/'),
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          products = productFromJson(response.body);
-          isLoading = false;
-        });
-      }
+      final fetchedProducts = await _productService.fetchProducts();
+      setState(() {
+        products = fetchedProducts;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -75,28 +73,38 @@ class _DisplayProductState extends State<DisplayProduct>
         .toList();
   }
 
+  void _showLoginRequiredSnackBar(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Masuk ke Batikin untuk melihat $feature!',
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
+        backgroundColor: AppColors.coklat2,
+        behavior: SnackBarBehavior.fixed,
+        duration: const Duration(milliseconds: 3500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Main Scrollable Content
           CustomScrollView(
             slivers: [
-              // Spacing for AppBar
               const SliverToBoxAdapter(
                 child: SizedBox(height: kToolbarHeight + 20),
               ),
 
-              // Main Content
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header Section
                       Row(
                         children: [
                           Text(
@@ -126,17 +134,16 @@ class _DisplayProductState extends State<DisplayProduct>
                       ),
                       const SizedBox(height: 16),
 
-                      // Filter Buttons
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Container(
                           width: MediaQuery.of(context)
                               .size
-                              .width, // Match parent width
+                              .width, 
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Row(
                             mainAxisAlignment:
-                                MainAxisAlignment.center, // Center horizontally
+                                MainAxisAlignment.center, 
                             children: [
                               _buildFilterButton(
                                   'pakaian_pria', 'Pakaian Pria'),
@@ -154,7 +161,6 @@ class _DisplayProductState extends State<DisplayProduct>
                 ),
               ),
 
-              // Products Grid with Animation
               SliverPadding(
                 padding: const EdgeInsets.all(16.0),
                 sliver: SliverGrid(
@@ -183,7 +189,6 @@ class _DisplayProductState extends State<DisplayProduct>
             ],
           ),
 
-          // Fixed AppBar with shadow
           Positioned(
             top: 0,
             left: 0,
@@ -203,37 +208,47 @@ class _DisplayProductState extends State<DisplayProduct>
                 bottom: false,
                 child: Container(
                   height: kToolbarHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       IconButton(
                         icon: Icon(Icons.arrow_back, color: AppColors.coklat1),
                         onPressed: () => Navigator.pop(context),
                       ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Batikin',
-                            style: TextStyle(
-                              fontFamily: AppFonts.javaneseText,
-                              fontSize: 24,
-                              color: AppColors.coklat1,
-                            ),
-                          ),
-                        ),
+                      const Spacer(),
+                      IconButton(
+                        icon: Icon(Icons.favorite_border, color: AppColors.coklat1),
+                        onPressed: () {/* Implement wishlist */},
                       ),
                       IconButton(
-                        icon:
-                            Icon(Icons.shopping_cart, color: AppColors.coklat1),
+                        icon: Icon(Icons.shopping_cart, color: AppColors.coklat1),
                         onPressed: () {
+                          final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+                          
+                          if (username.isEmpty || username == 'test') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Masuk ke Batikin untuk melihat keranjang!',
+                                  style: GoogleFonts.poppins(color: Colors.white),
+                                ),
+                                backgroundColor: AppColors.coklat2,
+                                behavior: SnackBarBehavior.fixed,
+                                duration: const Duration(milliseconds: 3500),
+                              ),
+                            );
+                            return;
+                          }
+                          
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => const DisplayCart()),
+                            MaterialPageRoute(builder: (context) => const DisplayCart()),
                           );
                         },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.person, color: AppColors.coklat1),
+                        onPressed: () {/* Implement profile */},
                       ),
                     ],
                   ),
@@ -244,7 +259,6 @@ class _DisplayProductState extends State<DisplayProduct>
         ],
       ),
 
-      // Floating Navigation Bar
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
@@ -268,7 +282,6 @@ class _DisplayProductState extends State<DisplayProduct>
                 currentIndex: _currentIndex,
                 onTap: (index) {
                   if (index == 2) {
-                    // Cart index
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -326,7 +339,6 @@ class _DisplayProductState extends State<DisplayProduct>
         setState(() {
           selectedCategory = category;
         });
-        // Reset animation dan jalankan kembali
         _controller.reset();
         _controller.forward();
       },
@@ -361,7 +373,13 @@ class _DisplayProductState extends State<DisplayProduct>
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          // Add hero animation and navigation
+          final username = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+          
+          if (username.isEmpty || username == 'test') {
+            _showLoginRequiredSnackBar('detail produk');
+            return;
+          }
+          
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -382,11 +400,14 @@ class _DisplayProductState extends State<DisplayProduct>
                 offset: const Offset(0, 2),
               ),
             ],
+            border: Border.all( 
+              color: AppColors.coklat1.withOpacity(0.25),
+              width: 1,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product Image
               Expanded(
                 child: ClipRRect(
                   borderRadius:
@@ -399,7 +420,6 @@ class _DisplayProductState extends State<DisplayProduct>
                 ),
               ),
 
-              // Product Info
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: const BoxDecoration(
@@ -410,7 +430,6 @@ class _DisplayProductState extends State<DisplayProduct>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Category Label
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -429,7 +448,6 @@ class _DisplayProductState extends State<DisplayProduct>
                     ),
                     const SizedBox(height: 4),
 
-                    // Product Name
                     Text(
                       product.fields.productName,
                       style: GoogleFonts.poppins(
@@ -442,7 +460,6 @@ class _DisplayProductState extends State<DisplayProduct>
                     ),
                     const SizedBox(height: 4),
 
-                    // Price and Wishlist
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -458,7 +475,6 @@ class _DisplayProductState extends State<DisplayProduct>
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              // Implement wishlist functionality
                             },
                             borderRadius: BorderRadius.circular(20),
                             child: const Padding(
