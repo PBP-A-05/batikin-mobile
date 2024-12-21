@@ -33,7 +33,7 @@ class Review {
 }
 
 class Fields {
-    int user;
+    String user;
     String product;
     ProfilePic profilePic;
     int rating;
@@ -80,4 +80,44 @@ class ProfilePic {
 
     Map<String, dynamic> toJson() => {
     };
+}
+
+class Comment {
+  final String id;
+  final String userId;
+  final String productId;
+  final double rating;
+  final String review;
+  final DateTime createdAt;
+
+  Comment({
+    required this.id,
+    required this.userId,
+    required this.productId,
+    required this.rating,
+    required this.review,
+    required this.createdAt,
+  });
+
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      id: json['pk'],
+      userId: json['fields']['user'],
+      productId: json['fields']['product'],
+      rating: json['fields']['rating'].toDouble(),
+      review: json['fields']['review'],
+      createdAt: DateTime.parse(json['fields']['created_at']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user': userId,
+      'product': productId,
+      'rating': rating,
+      'review': review,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
 }

@@ -16,3 +16,9 @@ String formatDate(DateTime date) {
   // Format the date as "DD/MM/YYYY HH:MM"
   return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
 }
+
+Future<Map<String, String>> getHeaders() async {
+  return {
+    'Content-Type': 'application/json',
+  };
+}

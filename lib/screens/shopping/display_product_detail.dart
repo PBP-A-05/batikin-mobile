@@ -10,10 +10,11 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:batikin_mobile/services/product_service.dart';
-import 'package:batikin_mobile/screens/cart/display_cart.dart'; // Import the cart page
 import 'package:batikin_mobile/screens/comments_review/comment_page.dart';
 import 'package:batikin_mobile/models/comment_model.dart';
 import 'package:batikin_mobile/screens/comments_review/comment_card.dart';
+import 'package:batikin_mobile/services/comment_service.dart';
+import 'package:batikin_mobile/screens/comments_review/comment_edit.dart';
 
 class DisplayProductDetail extends StatefulWidget {
   final String productId;
@@ -33,11 +34,15 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
   final PageController _pageController = PageController();
   int _currentImageIndex = 0;
   final ProductService _productService = ProductService();
+  final CommentService _commentService = CommentService();
   List<Review> reviews = [];
+  late String currentUsername;
+  final CookieRequest request = CookieRequest();
 
   @override
   void initState() {
     super.initState();
+    getCurrentUsername();
     fetchProductDetail();
     fetchReviews();
   }
@@ -64,19 +69,21 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
 
   Future<void> fetchReviews() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/review/get-reviews/${widget.productId}/'),
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          reviews = reviewFromJson(response.body);
-        });
-      } else {
-        print('Failed to load reviews');
-      }
+      setState(() => isLoading = true);
+      final fetchedReviews = await _commentService.fetchReviews(widget.productId);
+      setState(() {
+        reviews = reviewFromJson(jsonEncode(fetchedReviews));
+        isLoading = false;
+      });
     } catch (e) {
       print('Error fetching reviews: $e');
+      setState(() => isLoading = false);
     }
+  }
+
+  void getCurrentUsername() {
+    final request = context.read<CookieRequest>();
+    currentUsername = request.jsonData['username'] ?? '';
   }
 
   @override
@@ -249,15 +256,32 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CommentPage(
-                            productId: product?.pk ?? '',
-                            productName: product?.fields.productName ?? 'Product',
+                      if (hasUserReviewed()) {
+                        // Find user's review
+                        final userReview = reviews.firstWhere(
+                          (review) => review.fields.user == currentUsername
+                        );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CommentEditPage(
+                              productId: widget.productId,
+                              productName: product!.fields.productName,
+                              review: userReview,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CommentPage(
+                              productId: widget.productId,
+                              productName: product!.fields.productName,
+                            ),
+                          ),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.coklat1,
@@ -273,7 +297,7 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
                         const Icon(Icons.rate_review),
                         const SizedBox(width: 8),
                         Text(
-                          'Tambahkan Ulasan',
+                          hasUserReviewed() ? 'Edit Review' : 'Tulis Review',
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -767,8 +791,6 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
       );
     }
   }
-}
-
 
   Widget _buildReviewsSection() {
     return Padding(
@@ -785,7 +807,9 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
             ),
           ),
           const SizedBox(height: 16),
-          if (reviews.isEmpty)
+          if (isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (reviews.isEmpty)
             Center(
               child: Text(
                 'Belum ada ulasan',
@@ -802,5 +826,10 @@ class _DisplayProductDetailState extends State<DisplayProductDetail> {
         ],
       ),
     );
+  }
+
+  bool hasUserReviewed() {
+    if (currentUsername.isEmpty) return false;
+    return reviews.any((review) => review.fields.user == currentUsername);
   }
 }

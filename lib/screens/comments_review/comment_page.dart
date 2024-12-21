@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:batikin_mobile/services/auth_service.dart';
 import 'package:provider/provider.dart';
-import 'package:batikin_mobile/constant/colors.dart';
-import 'package:batikin_mobile/widgets/custom_text_field.dart';
-import 'package:batikin_mobile/widgets/custom_button.dart'; // Import CustomButton
+import 'package:batikin_mobile/constants/colors.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:batikin_mobile/screens/shopping/display_product_detail.dart';
+import 'package:batikin_mobile/config/config.dart';
 
 class CommentPage extends StatefulWidget {
   final String productId;
@@ -28,28 +28,22 @@ class _CommentPageState extends State<CommentPage> {
   double _rating = 0;
 
   Future<List<dynamic>> fetchReviews() async {
-  final request = context.read<CookieRequest>();
-  try {
-    
-    final response = await request.get(
-      'http://127.0.0.1:8000/review/json/${widget.productId}/',
-    );
-    
-    if (response == null) {
-      print('Response is null');
-      return [];
-    }
-
-    // If response is a List, process each review
-    if (response is List) {
-      return response.map((review) {
-        return {
-          'rating': review['fields']['rating'],
-          'comment': review['fields']['review']
-        };
-      }).toList();
-    }
-
+    try {
+      final response = await http.get(
+        Uri.parse('${Config.baseUrl}/review/json/${widget.productId}/'),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return data.map((review) {
+            return {
+              'rating': review['fields']['rating'],
+              'comment': review['fields']['review']
+            };
+          }).toList();
+        }
+      }
       return [];
     } catch (e, stackTrace) {
       print('Error in fetchReviews: $e');
@@ -63,7 +57,7 @@ class _CommentPageState extends State<CommentPage> {
       final request = context.read<CookieRequest>();
       try {
         final response = await request.postJson(
-          'http://127.0.0.1:8000/review/review/create/',
+          '${Config.baseUrl}/review/review/create/',
           jsonEncode(<String, String> {
             'product_id': widget.productId,
             'rating': _rating.toString(),
@@ -82,14 +76,16 @@ class _CommentPageState extends State<CommentPage> {
             ),
           );
 
-          await fetchReviews();
-
-          _commentController.clear();
-          setState(() {
-            _rating = 0;
-          });
-
-          Navigator.pop(context);
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DisplayProductDetail(
+                  productId: widget.productId,
+                ),
+              ),
+            );
+          }
         } else {
           print('Failed to submit review: ${response['message']}');
         }
