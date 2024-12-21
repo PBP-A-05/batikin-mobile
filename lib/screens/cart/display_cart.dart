@@ -6,6 +6,7 @@ import 'package:batikin_mobile/services/cart_service.dart';
 import 'package:batikin_mobile/models/view_cart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:batikin_mobile/constants/colors.dart';
+import 'package:batikin_mobile/utils/toast_util.dart';
 
 class DisplayCart extends StatefulWidget {
   const DisplayCart({super.key});
@@ -52,8 +53,10 @@ class _DisplayCartState extends State<DisplayCart> {
       });
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error loading cart: $e")),
+      showToast(
+        context,
+        "Error loading cart: $e",
+        type: ToastType.alert,
       );
     }
   }
@@ -92,16 +95,18 @@ class _DisplayCartState extends State<DisplayCart> {
         });
       } else {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Gagal mengupdate jumlah"),
-              backgroundColor: Colors.red),
+        showToast(
+          context,
+          "Gagal mengupdate jumlah",
+          type: ToastType.alert,
         );
       }
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      showToast(
+        context,
+        "Error: $e",
+        type: ToastType.alert,
       );
     }
   }
@@ -120,16 +125,18 @@ class _DisplayCartState extends State<DisplayCart> {
         });
       } else {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Gagal menghapus item"),
-              backgroundColor: Colors.red),
+        showToast(
+          context,
+          "Gagal menghapus item",
+          type: ToastType.alert,
         );
       }
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      showToast(
+        context,
+        "Error: $e",
+        type: ToastType.alert,
       );
     }
   }
@@ -152,19 +159,20 @@ class _DisplayCartState extends State<DisplayCart> {
         isLoading = false;
       });
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error sorting cart: $e")),
+      showToast(
+        context,
+        "Error sorting cart: $e",
+        type: ToastType.alert,
       );
     }
   }
 
   void showCheckoutDialog() {
     if (!selectedItems.values.contains(true)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pilih minimal satu produk untuk dibeli'),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        'Pilih minimal satu produk untuk dibeli',
+        type: ToastType.alert,
       );
       return;
     }

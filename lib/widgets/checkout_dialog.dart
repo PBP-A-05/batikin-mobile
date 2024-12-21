@@ -1,4 +1,3 @@
-// lib/widgets/checkout_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:batikin_mobile/constants/colors.dart';
 import 'package:batikin_mobile/models/view_cart.dart';
@@ -7,6 +6,7 @@ import 'package:batikin_mobile/models/address.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:batikin_mobile/utils/toast_util.dart';
 
 class CheckoutDialog extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -42,6 +42,12 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
         isLoading = false;
       });
     } catch (e) {
+      if (!context.mounted) return;
+      showToast(
+        context,
+        'Gagal memuat alamat: $e',
+        type: ToastType.alert,
+      );
       setState(() {
         isLoading = false;
       });
@@ -64,25 +70,18 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       if (!context.mounted) return;
       if (response.status == 'success') {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Pesanan berhasil dibuat!',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            backgroundColor: AppColors.coklat2,
-            behavior: SnackBarBehavior.fixed,
-            duration: const Duration(milliseconds: 3500), 
-          ),
+        showToast(
+          context,
+          'Pesanan berhasil dibuat!',
+          type: ToastType.success,
         );
       }
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error creating order: $e'),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        'Error creating order: $e',
+        type: ToastType.alert,
       );
     }
   }
